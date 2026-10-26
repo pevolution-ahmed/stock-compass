@@ -1,0 +1,364 @@
+{
+ "explains": [],
+ "count": 15,
+ "quotes": [
+  {
+   "exchange": "NMS",
+   "shortname": "NVIDIA Corporation",
+   "quoteType": "EQUITY",
+   "symbol": "NVDA",
+   "index": "quotes",
+   "score": 212671.0,
+   "typeDisp": "Equity",
+   "longname": "NVIDIA Corporation",
+   "exchDisp": "NASDAQ",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "dispSecIndFlag": true,
+   "isYahooFinance": true,
+   "prevName": "Usual Stablecoin",
+   "nameChangeDate": "2026-10-25"
+  },
+  {
+   "exchange": "CME",
+   "shortname": "NVIDIA Corp Single Stock future",
+   "quoteType": "FUTURE",
+   "symbol": "SNVDA=F",
+   "index": "quotes",
+   "score": 30048.0,
+   "typeDisp": "Futures",
+   "longname": "NVIDIA Corp Single Stock futures",
+   "exchDisp": "Chicago Mercantile Exchange",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "CME",
+   "shortname": "Micro NVIDIA Corp Stock Futures",
+   "quoteType": "FUTURE",
+   "symbol": "XNVDA=F",
+   "index": "quotes",
+   "score": 30019.0,
+   "typeDisp": "Futures",
+   "exchDisp": "Chicago Mercantile Exchange",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "BTS",
+   "shortname": "T-Rex 2X Long NVIDIA Daily Targ",
+   "quoteType": "ETF",
+   "symbol": "NVDX",
+   "index": "quotes",
+   "score": 20291.0,
+   "typeDisp": "ETF",
+   "exchDisp": "BATS Trading",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "TOR",
+   "shortname": "NVIDIA CDR (CAD HEDGED)",
+   "quoteType": "EQUITY",
+   "symbol": "NVDA.TO",
+   "index": "quotes",
+   "score": 20156.0,
+   "typeDisp": "Equity",
+   "longname": "NVIDIA Corporation",
+   "exchDisp": "Toronto",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "isYahooFinance": true,
+   "prevName": "Usual Stablecoin",
+   "nameChangeDate": "2026-10-25"
+  },
+  {
+   "exchange": "GER",
+   "shortname": "NVIDIA CORP.                  R",
+   "quoteType": "EQUITY",
+   "symbol": "NVD.DE",
+   "index": "quotes",
+   "score": 20089.0,
+   "typeDisp": "Equity",
+   "longname": "NVIDIA Corporation",
+   "exchDisp": "XETRA",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "isYahooFinance": true,
+   "prevName": "Usual Stablecoin",
+   "nameChangeDate": "2026-10-25"
+  },
+  {
+   "exchange": "NEO",
+   "shortname": "NVIDIA CDR (CAD HEDGED)",
+   "quoteType": "EQUITY",
+   "symbol": "NVDA.NE",
+   "index": "quotes",
+   "score": 20055.0,
+   "typeDisp": "Equity",
+   "longname": "NVIDIA Corporation",
+   "exchDisp": "NEO",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "isYahooFinance": true
+  }
+ ],
+ "news": [
+  {
+   "uuid": "8bfe063f-9f36-318f-8e10-a95264dae534",
+   "title": "Alphabet Has $514 Billion in Cloud Orders. Here\u2019s What Matters More Than That Number on Oct. 28.",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/technology/ai/articles/alphabet-514-billion-cloud-orders-093001260.html",
+   "providerPublishTime": 1793007001,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/7d0431986e948b3a5cc5133181377fb3.jpg",
+      "width": 1290,
+      "height": 860,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/63F3D710090BB0A252D2048E24248D3BD91070F595B00609AA37D92E2BBF86F7/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F7d0431986e948b3a5cc5133181377fb3.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "GOOG",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "65670c65-b5ae-39e3-a1e7-543b0f4c6a2d",
+   "title": "Wall Street's Blockbuster Stock Split Was Just Announced, and It's Anything but Conventional",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/wall-streets-blockbuster-stock-split-092602493.html",
+   "providerPublishTime": 1793006762,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/0618c00c765647663f31050b16ee179a.jpg",
+      "width": 1400,
+      "height": 933,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/73FB8378B653339BC6C9B81F6E4A44B2BD3EADE5453E7DBC2A7B03131427264C/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F0618c00c765647663f31050b16ee179a.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "META",
+    "CRWD",
+    "MNST",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "424f36d6-f678-3546-b52d-64d9a84c0214",
+   "title": "Musk Says SpaceX Closed $40 Billion Debt Deal, Blasts Neoclouds",
+   "publisher": "Bloomberg",
+   "link": "https://finance.yahoo.com/technology/ai/articles/musk-says-spacex-closed-40-212239596.html",
+   "providerPublishTime": 1793006623,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/bloomberg_holding_pen_162/f3b2ff45fbe4620504d20404c47d5fd5.jpg",
+      "width": 2000,
+      "height": 1334,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/498A6FBF6FDDCEB55473E34F17CDA57305635ED6FBDA5AFAA3FBF6FE35E589E9/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fbloomberg_holding_pen_162%2Ff3b2ff45fbe4620504d20404c47d5fd5.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "SPCX",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "fd2e3738-90c5-3b0c-9a85-486079455d30",
+   "title": "Should You Buy the Dip in Nike Stock While the Market Is This Nervous?",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/buy-dip-nike-stock-while-092200688.html",
+   "providerPublishTime": 1793006520,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/7496b43a66b67149a578459a00f1dff9.png",
+      "width": 1200,
+      "height": 800,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/2DCE2B1029E7471C159AA7746E606F12301A4FFB94C1D8BC2CE206E7BF028C75/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F7496b43a66b67149a578459a00f1dff9.png",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "NKE",
+    "NVDA",
+    "^GSPC"
+   ]
+  },
+  {
+   "uuid": "88df90a1-b67d-3238-9d04-669a2aaec251",
+   "title": "Here\u2019s What a $10,000 Investment in Micron Stock Will Be Worth by 2030",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/10-000-investment-micron-stock-092002025.html",
+   "providerPublishTime": 1793006402,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/40d70e66d384f30b2cfc4aeb7b5a6465.jpg",
+      "width": 1290,
+      "height": 860,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/1B8FC7F45FC6D9A06B59189CB7BC29D804E7FB02CBAFDDE19AEB3B4EC0E724F6/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F40d70e66d384f30b2cfc4aeb7b5a6465.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "MU",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "bcf7c99e-c22e-4a39-b76d-505b2f979bf9",
+   "title": "'The world's super company': Wall Street weighs SpaceX earnings, company's likely Tesla tie-up",
+   "publisher": "Yahoo Finance",
+   "link": "https://finance.yahoo.com/markets/stocks/article/the-worlds-super-company-wall-street-weighs-spacex-earnings-companys-likely-tesla-tie-up-173949705.html",
+   "providerPublishTime": 1793006024,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://d29szjachogqwa.cloudfront.net/images/2026-10/c844c8d7-b682-4fb4-a41a-fa589463accc",
+      "width": 7909,
+      "height": 5272,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/3143904A01687F6250A361EE1616C06103CA1ECFC27161FA6E30DE6EABD4EB94/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fd29szjachogqwa.cloudfront.net%2Fimages%2F2026-10%2Fc844c8d7-b682-4fb4-a41a-fa589463accc",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "SPCX",
+    "TSLA",
+    "AMZN",
+    "GOOG",
+    "TSM",
+    "NVDA",
+    "META",
+    "MSFT"
+   ]
+  },
+  {
+   "uuid": "26e624e6-c784-3cfc-9420-d83c0c025286",
+   "title": "3 High-Yield Stocks to Buy With $1,000 Right Now",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/3-high-yield-stocks-buy-090400878.html",
+   "providerPublishTime": 1793005440,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/b900e4e74dbe112f42f7ccca1c20a12e.jpg",
+      "width": 1400,
+      "height": 934,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/BD2013FF8CC189178ABDEA9089B073C43ADF45A99E56DFDBCBC851E7BF73E3ED/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2Fb900e4e74dbe112f42f7ccca1c20a12e.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "^GSPC",
+    "BMY",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "74210d9e-f825-3f4a-853a-98ae6274b727",
+   "title": "The Narrow Earnings Boom",
+   "publisher": "The Wall Street Journal",
+   "link": "https://finance.yahoo.com/m/74210d9e-f825-3f4a-853a-98ae6274b727/the-narrow-earnings-boom.html",
+   "providerPublishTime": 1793005426,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/wsj.com/7b2c285183be07ca3c4e8242b25a59a8.png",
+      "width": 1200,
+      "height": 630,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/69E5E705C465BC982984B87DFBA9D9F27CF4846DAB42AA4539F0CC74879826D7/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F7b2c285183be07ca3c4e8242b25a59a8.png",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "^GSPC",
+    "NVDA",
+    "MU"
+   ]
+  }
+ ],
+ "nav": [],
+ "lists": [],
+ "researchReports": [],
+ "screenerFieldResults": [],
+ "totalTime": 137,
+ "timeTakenForQuotes": 413,
+ "timeTakenForNews": 600,
+ "timeTakenForAlgowatchlist": 400,
+ "timeTakenForPredefinedScreener": 400,
+ "timeTakenForCrunchbase": 0,
+ "timeTakenForNav": 400,
+ "timeTakenForResearchReports": 0,
+ "timeTakenForQuestions": 0,
+ "timeTakenForScreenerField": 0,
+ "timeTakenForCulturalAssets": 0,
+ "timeTakenForSearchLists": 0
+}

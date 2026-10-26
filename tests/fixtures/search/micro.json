@@ -1,0 +1,364 @@
+{
+ "explains": [],
+ "count": 15,
+ "quotes": [
+  {
+   "exchange": "CMX",
+   "shortname": "Micro Gold Futures,Dec-2026",
+   "quoteType": "FUTURE",
+   "symbol": "MGC=F",
+   "index": "quotes",
+   "score": 3051600.0,
+   "typeDisp": "Futures",
+   "exchDisp": "New York Commodity Exchange",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "NMS",
+   "shortname": "Micron Technology, Inc.",
+   "quoteType": "EQUITY",
+   "symbol": "MU",
+   "index": "quotes",
+   "score": 205532.0,
+   "typeDisp": "Equity",
+   "longname": "Micron Technology, Inc.",
+   "exchDisp": "NASDAQ",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "NMS",
+   "shortname": "Advanced Micro Devices, Inc.",
+   "quoteType": "EQUITY",
+   "symbol": "AMD",
+   "index": "quotes",
+   "score": 92937.0,
+   "typeDisp": "Equity",
+   "longname": "Advanced Micro Devices, Inc.",
+   "exchDisp": "NASDAQ",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Semiconductors",
+   "industryDisp": "Semiconductors",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "NMS",
+   "shortname": "Microsoft Corporation",
+   "quoteType": "EQUITY",
+   "symbol": "MSFT",
+   "index": "quotes",
+   "score": 76567.0,
+   "typeDisp": "Equity",
+   "longname": "Microsoft Corporation",
+   "exchDisp": "NASDAQ",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Software\u2014Infrastructure",
+   "industryDisp": "Software\u2014Infrastructure",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "NMS",
+   "shortname": "Super Micro Computer, Inc.",
+   "quoteType": "EQUITY",
+   "symbol": "SMCI",
+   "index": "quotes",
+   "score": 48581.0,
+   "typeDisp": "Equity",
+   "longname": "Super Micro Computer, Inc.",
+   "exchDisp": "NASDAQ",
+   "sector": "Technology",
+   "sectorDisp": "Technology",
+   "industry": "Computer Hardware",
+   "industryDisp": "Computer Hardware",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "CME",
+   "shortname": "Micro E-mini Nasdaq-100 Index F",
+   "quoteType": "FUTURE",
+   "symbol": "MNQ=F",
+   "index": "quotes",
+   "score": 30997.0,
+   "typeDisp": "Futures",
+   "exchDisp": "Chicago Mercantile Exchange",
+   "isYahooFinance": true
+  },
+  {
+   "exchange": "CME",
+   "shortname": "MICRO E-MINI S&P 500 INDEX FUTU",
+   "quoteType": "FUTURE",
+   "symbol": "MES=F",
+   "index": "quotes",
+   "score": 30741.0,
+   "typeDisp": "Futures",
+   "exchDisp": "Chicago Mercantile Exchange",
+   "isYahooFinance": true
+  }
+ ],
+ "news": [
+  {
+   "uuid": "88df90a1-b67d-3238-9d04-669a2aaec251",
+   "title": "Here\u2019s What a $10,000 Investment in Micron Stock Will Be Worth by 2030",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/10-000-investment-micron-stock-092002025.html",
+   "providerPublishTime": 1793006402,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/40d70e66d384f30b2cfc4aeb7b5a6465.jpg",
+      "width": 1290,
+      "height": 860,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/1B8FC7F45FC6D9A06B59189CB7BC29D804E7FB02CBAFDDE19AEB3B4EC0E724F6/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F40d70e66d384f30b2cfc4aeb7b5a6465.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "MU",
+    "NVDA"
+   ]
+  },
+  {
+   "uuid": "74210d9e-f825-3f4a-853a-98ae6274b727",
+   "title": "The Narrow Earnings Boom",
+   "publisher": "The Wall Street Journal",
+   "link": "https://finance.yahoo.com/m/74210d9e-f825-3f4a-853a-98ae6274b727/the-narrow-earnings-boom.html",
+   "providerPublishTime": 1793005426,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/wsj.com/7b2c285183be07ca3c4e8242b25a59a8.png",
+      "width": 1200,
+      "height": 630,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/69E5E705C465BC982984B87DFBA9D9F27CF4846DAB42AA4539F0CC74879826D7/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F7b2c285183be07ca3c4e8242b25a59a8.png",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "^GSPC",
+    "NVDA",
+    "MU"
+   ]
+  },
+  {
+   "uuid": "e97b87da-cec9-322d-bade-0208112defbb",
+   "title": "\u201cDurability and Predictability\u201d: Micron Is Up 200% in 2026. Take Profits, or Buy More?",
+   "publisher": "TIKR",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/durability-predictability-micron-200-2026-072107667.html",
+   "providerPublishTime": 1792999267,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/tikr_258/573e1a0668231736e0689d7154595ec7",
+      "width": 1280,
+      "height": 720,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/B7B872172FBA236BC8D803D9F42CA49D4D588020F0572D33058298F8078BBD50/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Ftikr_258%2F573e1a0668231736e0689d7154595ec7",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "MU"
+   ]
+  },
+  {
+   "uuid": "edb2a41f-7a92-352b-aab3-afe9bb9736de",
+   "title": "Is Nvidia Stock Cheaper Now That Its Multiple Has Fallen?",
+   "publisher": "Trefis",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-stock-cheaper-now-multiple-050625230.html",
+   "providerPublishTime": 1792991185,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/trefis_142/b873e06c110baeb7d29ba6df6ec3cafb.jpg",
+      "width": 1280,
+      "height": 721,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/E5B734B3118AA8BB856E043D4FB0BBC29B1FFB2256B4758B1F8E18A61990C087/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Ftrefis_142%2Fb873e06c110baeb7d29ba6df6ec3cafb.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "NVDA",
+    "AMD",
+    "INTC",
+    "AVGO",
+    "QCOM",
+    "MRVL"
+   ]
+  },
+  {
+   "uuid": "5fbb9a9a-ffe0-3a12-b692-4788264087ec",
+   "title": "What Changed In AMD's Story?",
+   "publisher": "Trefis",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/changed-amds-story-050606828.html",
+   "providerPublishTime": 1792991166,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/trefis_142/f9b1b44322f3fe94699cfbe3b3dc3e3b.jpg",
+      "width": 1280,
+      "height": 720,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/DD8C10CEAF6F3E6DE98A9C8385648D40397C27BACBA4D291C9F4542F93ABA2C6/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Ftrefis_142%2Ff9b1b44322f3fe94699cfbe3b3dc3e3b.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "AMD",
+    "INTC",
+    "NVDA",
+    "AVGO",
+    "QCOM",
+    "MRVL"
+   ]
+  },
+  {
+   "uuid": "b7467c1b-5a35-3588-a41f-200f16a01b5b",
+   "title": "Chip Stocks to Buy After Their Worst Day Since June",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/chip-stocks-buy-worst-day-033702843.html",
+   "providerPublishTime": 1792985822,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/cc40beaf1e184e4c64e5595f69480cd3.jpg",
+      "width": 1400,
+      "height": 888,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/2D93C8902BF0BE67E0270589E0B1BCBD67C70760327D95AE5B191F7EAB756DDA/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2Fcc40beaf1e184e4c64e5595f69480cd3.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "LRCX",
+    "^SOX",
+    "NVDA",
+    "MU",
+    "AMD",
+    "MRVL"
+   ]
+  },
+  {
+   "uuid": "96eab5d5-6a79-3e74-810f-436a786d023b",
+   "title": "AI Stocks Surge, Then Plunge: Which of 4 Sectors Is Worth Buying?",
+   "publisher": "24/7 Wall St.",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/ai-stocks-surge-then-plunge-004245035.html",
+   "providerPublishTime": 1792975365,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/24_7_wall_st__718/3762d40ae956cc767afbcb6aa7123d82.jpg",
+      "width": 1500,
+      "height": 843,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/9500990EC250275B015E8FFD85CE604BDDA2049DDE1B04DF4859C70C566E8104/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2F24_7_wall_st__718%2F3762d40ae956cc767afbcb6aa7123d82.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "LRCX",
+    "MU",
+    "NVDA",
+    "TSM",
+    "AMAT",
+    "STX",
+    "WDC"
+   ]
+  },
+  {
+   "uuid": "b85cbd8c-adbe-39dc-b4da-5a7eda0e080f",
+   "title": "Prediction: 2 Stocks That Will Be Worth More Than AMD 5 Years From Now",
+   "publisher": "Motley Fool",
+   "link": "https://finance.yahoo.com/markets/stocks/articles/prediction-2-stocks-worth-more-232000479.html",
+   "providerPublishTime": 1792970400,
+   "type": "STORY",
+   "thumbnail": {
+    "resolutions": [
+     {
+      "url": "https://media.zenfs.com/en/motleyfool.com/18385160b54db6da256d4449360878b5.jpg",
+      "width": 1200,
+      "height": 800,
+      "tag": "original"
+     },
+     {
+      "url": "https://s.yimg.com/lo/mysterio/api/367B26440C2E2572F9FC5B1FAFB3B82C6A9B9C00840467C8168D95981B72A39E/subgraphmysterio/resizefill_w140_h140/https:%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F18385160b54db6da256d4449360878b5.jpg",
+      "width": 140,
+      "height": 140,
+      "tag": "140x140"
+     }
+    ]
+   },
+   "relatedTickers": [
+    "CBRS",
+    "AMD",
+    "NVDA",
+    "MRVL"
+   ]
+  }
+ ],
+ "nav": [],
+ "lists": [],
+ "researchReports": [],
+ "screenerFieldResults": [],
+ "totalTime": 149,
+ "timeTakenForQuotes": 414,
+ "timeTakenForNews": 600,
+ "timeTakenForAlgowatchlist": 400,
+ "timeTakenForPredefinedScreener": 400,
+ "timeTakenForCrunchbase": 0,
+ "timeTakenForNav": 400,
+ "timeTakenForResearchReports": 0,
+ "timeTakenForQuestions": 0,
+ "timeTakenForScreenerField": 0,
+ "timeTakenForCulturalAssets": 0,
+ "timeTakenForSearchLists": 0
+}
