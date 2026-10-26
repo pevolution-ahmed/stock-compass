@@ -43,7 +43,7 @@ def valuation_ui():
         tags.div(c.card(ui.output_ui("dcf_result"), class_="dcf-result"), sliders, class_="grid grid-2"),
         tags.div(
             c.card(output_widget("dcf_chart", height="280px"), title="Projected cash flows",
-                   subtitle="Lighter bars: projected FCF · dark bars: what each is worth today"),
+                   subtitle="Faded bars: projected free cash flow · solid bars: what each is worth today"),
             c.card(ui.output_ui("sensitivity"), title="Sensitivity",
                    subtitle="Value per share by discount rate (rows) and long-run growth g (columns); green = above today's price"),
             class_="grid grid-2 mt-3",

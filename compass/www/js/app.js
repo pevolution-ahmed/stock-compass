@@ -214,3 +214,30 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
   $(document).on("shiny:recalculating shiny:recalculated shiny:value shiny:error shiny:idle",
                  () => schedule(SHOW_AFTER));
 })();
+
+
+// Light / dark switch: flips CSS variables instantly and tells the server so charts redraw in the new palette.
+(() => {
+  const root = document.documentElement;
+  const button = document.getElementById("theme-toggle");
+  const current = () => (root.getAttribute("data-theme") === "dark" ? "dark" : "light");
+  const sync = () => {
+    const navbar = document.querySelector(".navbar");
+    if (navbar) navbar.setAttribute("data-bs-theme", current());
+    if (button) button.setAttribute("aria-pressed", current() === "dark" ? "true" : "false");
+  };
+  sync();
+  document.addEventListener("DOMContentLoaded", sync);
+  $(document).on("shiny:connected", () => Shiny.setInputValue("theme", current()));
+  if (!button) return;
+  button.addEventListener("click", () => {
+    const next = current() === "dark" ? "light" : "dark";
+    root.classList.add("theme-switching");
+    root.setAttribute("data-theme", next);
+    root.setAttribute("data-bs-theme", next);
+    sync();
+    try { localStorage.setItem("compass.theme", next); } catch (e) { /* storage blocked */ }
+    if (window.Shiny && Shiny.setInputValue) Shiny.setInputValue("theme", next);
+    setTimeout(() => root.classList.remove("theme-switching"), 350);
+  });
+})();

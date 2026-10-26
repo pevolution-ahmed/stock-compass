@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 import pandas as pd
+from requests_futures.sessions import FuturesSession
 
 SNAPSHOT_MODULES = [
     "price", "quoteType", "summaryDetail", "defaultKeyStatistics", "financialData",
@@ -74,7 +75,6 @@ class YahooClient:
         return self._local.session
 
     def _ticker(self, symbols: list[str], fresh: bool = False):
-        from requests_futures.sessions import FuturesSession
         from yahooquery import Ticker
 
         session = self._session(fresh)

@@ -13,7 +13,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from .palette import ROLES, rgba
+from .palette import DARK_ROLES, ROLES, rgba, to_dark
 
 INK = ROLES["ink"]
 SECONDARY = ROLES["secondary"]
@@ -35,7 +35,8 @@ pio.templates["compass"] = go.layout.Template(layout=go.Layout(
     colorway=[INK, SECONDARY, ROLES["accent"], PEBBLE, SLATE, LOSS],
     margin=dict(l=8, r=8, t=8, b=8),
     hovermode="x unified",
-    hoverlabel=dict(bgcolor=INK, bordercolor=INK, font=dict(family=FONT, color="#ffffff", size=12)),
+    hoverlabel=dict(bgcolor=ROLES["feature"], bordercolor=ROLES["feature"],
+                    font=dict(family=FONT, color=ROLES["on-feature"], size=12)),
     legend=dict(orientation="h", x=0, y=1.02, yanchor="bottom", bgcolor="rgba(0,0,0,0)",
                 font=dict(size=12), title=None),
     xaxis=dict(showgrid=False, linecolor=FOG, ticks="", zeroline=False, automargin=True,
@@ -47,10 +48,28 @@ pio.templates["compass"] = go.layout.Template(layout=go.Layout(
 pio.templates.default = "compass"
 
 
+def session_mode() -> str:
+    """The visitor's light/dark choice (a reactive read, so charts redraw when it changes)."""
+    from shiny.session import get_current_session
+
+    session = get_current_session()
+    if session is None:
+        return "light"
+    root = session.root_scope()
+    return "dark" if "theme" in root.input and root.input["theme"]() == "dark" else "light"
+
+
 def _finish(fig: go.Figure, height: int = 340, **layout) -> go.Figure:
     fig.update_layout(height=height, template="compass", **layout)
     # shinywidgets serializes with strict JSON, which rejects NaN; Plotly's encoder turns NaN into null
-    return go.Figure(json.loads(fig.to_json()))
+    text = fig.to_json()
+    if session_mode() == "dark":
+        text = to_dark(text)
+        figure = go.Figure(json.loads(text))
+        figure.update_layout(hoverlabel=dict(bgcolor=DARK_ROLES["feature"], bordercolor=DARK_ROLES["feature"],
+                                             font_color=DARK_ROLES["on-feature"]))
+        return figure
+    return go.Figure(json.loads(text))
 
 
 def empty_figure(message: str, height: int = 280) -> go.Figure:
@@ -137,7 +156,7 @@ def monthly_heatmap(table: pd.DataFrame, height: int | None = None) -> go.Figure
     fig = go.Figure(go.Heatmap(
         z=values, x=months, y=[str(y) for y in table.index],
         zmin=-limit, zmax=limit,
-        colorscale=[[0, LOSS], [0.5, "#f5f6fa"], [1, GAIN]],
+        colorscale=[[0, LOSS], [0.5, FOG], [1, GAIN]],
         text=text, texttemplate="%{text}", textfont=dict(size=11),
         hovertemplate="%{x} %{y}: %{z:+.1%}<extra></extra>",
         showscale=False, xgap=2, ygap=2,
