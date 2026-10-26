@@ -241,3 +241,37 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
     setTimeout(() => root.classList.remove("theme-switching"), 350);
   });
 })();
+
+
+// Fit every chart to its card. Widgets draw each new chart before it's placed in the page, so
+// Plotly falls back to a 700px width; fit newly drawn charts at once and whenever a card resizes
+// (tab shown, section revealed, phone rotated).
+(() => {
+  const fit = (plot) => { if (window.Plotly && plot.offsetParent) Plotly.Plots.resize(plot); };
+  // After every draw, refit only if the chart's width doesn't match its card (no resize loops)
+  const fitIfWrong = (plot) => {
+    const drawn = plot._fullLayout && plot._fullLayout.width;
+    const room = plot.parentElement && plot.parentElement.getBoundingClientRect().width;
+    if (drawn && room && Math.abs(drawn - room) > 2) fit(plot);
+  };
+  const cards = new ResizeObserver((entries) => {
+    for (const entry of entries) entry.target.querySelectorAll(".js-plotly-plot").forEach(fit);
+  });
+  const watched = new WeakSet();
+  const scan = () => {
+    document.querySelectorAll(".shiny-ipywidget-output").forEach((output) => {
+      if (!watched.has(output)) { watched.add(output); cards.observe(output); }
+    });
+    document.querySelectorAll(".js-plotly-plot").forEach((plot) => {
+      if (!watched.has(plot)) {
+        watched.add(plot);
+        requestAnimationFrame(() => fit(plot));
+        if (plot.on) plot.on("plotly_afterplot", () => fitIfWrong(plot));
+      }
+    });
+  };
+  new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("shown.bs.tab", () => setTimeout(() => {
+    document.querySelectorAll(".tab-pane.active .js-plotly-plot").forEach(fit);
+  }, 60));
+})();

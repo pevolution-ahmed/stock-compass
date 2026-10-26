@@ -229,10 +229,10 @@ def margin_lines(frame: pd.DataFrame, height: int = 320) -> go.Figure:
             # Label each line at its end so similar hues are never ambiguous
             fig.add_annotation(x=years[frame.index.get_loc(last.index[-1])], y=float(last.iloc[-1]),
                                text=f"{column} {last.iloc[-1] * 100:.0f}%", showarrow=False, xanchor="left",
-                               xshift=10, font=dict(color=color, size=12))
+                               xshift=8, font=dict(color=color, size=11))
     fig.update_yaxes(tickformat=".0%", side="left")
     fig.update_xaxes(type="category")
-    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=120, t=8, b=8))
+    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=104, t=8, b=8))
 
 
 def stacked_payouts(frame: pd.DataFrame, prefix: str = "$", height: int = 300) -> go.Figure:
@@ -440,4 +440,7 @@ def comparison_chart(lines: dict, height: int = 380) -> go.Figure:
                                xshift=8, font=dict(color=color, size=11))
     fig.add_hline(y=0, line=dict(color=PEBBLE, width=1, dash="dot"))
     fig.update_yaxes(side="left", tickformat="+.0%")
-    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=120, t=8, b=8))
+    if finals:  # pin the axis to the data; annotations must not stretch it
+        start = min(trace.x[0] for trace in fig.data)
+        fig.update_xaxes(range=[start, max(x for _, x, _, _ in finals)])
+    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=104, t=8, b=8))

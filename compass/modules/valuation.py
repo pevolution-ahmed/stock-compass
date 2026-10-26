@@ -186,12 +186,19 @@ def valuation_server(input, output, session, ctx: StockContext):
         ui.update_slider("discount", value=round(a.discount * 400) / 4)
         ui.update_slider("terminal", value=round(a.terminal_growth * 400) / 4)
 
+    seeded_for = reactive.value(None)
+
     @reactive.effect
-    @reactive.event(ctx.symbol, ctx.statements.task.status)
     def _seed_sliders():
+        # Re-runs as each data source arrives (defaults() waits silently until all are ready),
+        # but seeds only once per symbol so the visitor's own slider changes are kept
         a = defaults()
-        if a is not None:
+        symbol = ctx.symbol()
+        with reactive.isolate():
+            already = seeded_for() == symbol
+        if a is not None and not already:
             apply_defaults(a)
+            seeded_for.set(symbol)
 
     @reactive.effect
     @reactive.event(input.reset)
