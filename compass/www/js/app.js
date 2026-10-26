@@ -165,3 +165,52 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
     }
   });
 })();
+
+
+// Mini loader: a small logo pill while the visible tab is still rendering — on the first visit to
+// a tab (Shiny renders hidden outputs only once shown) and while an in-tab change recalculates.
+(() => {
+  const pill = document.getElementById("compass-mini-loader");
+  const overlay = document.getElementById("compass-loader");
+  if (!pill) return;
+  const text = document.getElementById("compass-mini-text");
+  const SHOW_AFTER = 180;  // ms of continuous busy before showing, so instant updates don't flicker
+  const MIN_VISIBLE = 450; // once shown, stay long enough to read
+  let busySince = null, shownAt = 0, pending = false, justSwitched = false;
+
+  const activePane = () => document.querySelector(".tab-content > .tab-pane.active");
+  const activeName = () => (document.querySelector(".navbar .nav-link.active") || {}).textContent || "";
+  // Only visible outputs count: sections hidden on purpose (e.g. the DCF for a bank) stay "pending" forever
+  const busy = (pane) => !!pane && [...pane.querySelectorAll(".recalculating")].some((el) => el.offsetParent !== null);
+
+  function update() {
+    pending = false;
+    const pane = activePane();
+    const overlayOpen = overlay && overlay.classList.contains("is-visible");
+    const now = performance.now();
+    if (!overlayOpen && busy(pane)) {
+      busySince = busySince ?? now;
+      text.textContent = `${justSwitched ? "Loading" : "Updating"} ${activeName().trim()}…`;
+      if (now - busySince >= SHOW_AFTER && !pill.classList.contains("is-visible")) {
+        pill.classList.add("is-visible");
+        shownAt = now;
+      }
+      schedule(120);  // keep polling while busy (covers outputs that finish without an event)
+    } else {
+      busySince = null;
+      const wait = MIN_VISIBLE - (now - shownAt);
+      if (pill.classList.contains("is-visible") && wait > 0) return schedule(wait);
+      pill.classList.remove("is-visible");
+      justSwitched = false;
+    }
+  }
+  function schedule(delay = 0) {
+    if (pending) return;
+    pending = true;
+    setTimeout(() => requestAnimationFrame(update), delay);
+  }
+
+  document.addEventListener("shown.bs.tab", () => { justSwitched = true; busySince = null; schedule(30); });
+  $(document).on("shiny:recalculating shiny:recalculated shiny:value shiny:error shiny:idle",
+                 () => schedule(SHOW_AFTER));
+})();

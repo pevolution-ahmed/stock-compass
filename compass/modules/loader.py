@@ -45,6 +45,19 @@ def progress(states: dict[str, str]) -> dict:
 
 @module.ui
 def loader_ui():
+    return tags.div(overlay(), mini())
+
+
+def mini():
+    """Small pill shown while the visible tab is still rendering (first visit, or after a change)."""
+    return tags.div(
+        tags.span(HTML(logo_svg(22)), class_="mini-mark", aria_hidden="true"),
+        tags.span("Loading…", id="compass-mini-text"),
+        id="compass-mini-loader", class_="mini-loader", role="status", aria_live="polite",
+    )
+
+
+def overlay():
     return tags.div(
         tags.div(
             tags.div(HTML(logo_svg(72)), class_="loader-mark", aria_hidden="true"),
