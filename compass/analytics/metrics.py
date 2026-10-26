@@ -54,8 +54,8 @@ def snapshot_metrics(snapshot: Snapshot, statements: Statements | None = None) -
         "ev_revenue": get("enterpriseToRevenue"),
         "price_to_sales": get("priceToSalesTrailing12Months"),
         "price_to_book": get("priceToBook"),
-        "fcf": fcf,
-        "fcf_yield": ratio(fcf, market_cap),
+        "fcf": fcf,  # in statement currency
+        "fcf_yield": ratio(fcf * snapshot.fx, market_cap) if fcf is not None and snapshot.fx else None,
         "earnings_yield": ratio(1.0, trailing_pe),
         "dividend_yield": get("dividendYield") or get("yield") or get("trailingAnnualDividendYield"),
         "dividend_yield_5y": get("fiveYearAvgDividendYield"),
@@ -103,7 +103,9 @@ def statement_metrics(snapshot: Snapshot, statements: Statements | None) -> Metr
         return {}
     st = statements
     f_score = fa.piotroski_score(fa.piotroski(st))
-    altman = None if snapshot.is_financial else fa.altman_z(st, snapshot.market_cap)
+    # Market cap is in the quote's currency; statements may not be
+    market_cap = snapshot.market_cap / snapshot.fx if snapshot.market_cap and snapshot.fx else None
+    altman = None if snapshot.is_financial else fa.altman_z(st, market_cap)
     fcf = ttm_value(st, "cashflow", "FreeCashFlow")
     net_income = ttm_value(st, "income", "NetIncome")
     return {
@@ -117,14 +119,14 @@ def statement_metrics(snapshot: Snapshot, statements: Statements | None) -> Metr
         "eps_cagr_3y": fa.cagr(fa.col(st.income, "DilutedEPS")),
         "fcf_cagr_3y": fa.cagr(fa.col(st.cashflow, "FreeCashFlow")),
         "equity_to_assets": fa.div(fa.latest(st.balance, "StockholdersEquity"), fa.latest(st.balance, "TotalAssets")),
-        "buyback_yield": fa.buyback_yield(st, snapshot.market_cap),
+        "buyback_yield": fa.buyback_yield(st, market_cap),
     }
 
 
 def dcf_inputs(snapshot: Snapshot, statements: Statements | None, metrics: Metrics,
                risk_free: float) -> dcf.Assumptions | None:
     """Default DCF assumptions, or None when a cash-flow DCF doesn't fit (funds, banks, negative FCF)."""
-    if statements is None or statements.empty or snapshot.is_fund or snapshot.is_financial:
+    if statements is None or statements.empty or snapshot.is_fund or snapshot.is_financial or not snapshot.fx:
         return None
     fcf = metrics.get("fcf")
     shares = to_float(snapshot.get("sharesOutstanding")) or to_float(snapshot.get("impliedSharesOutstanding"))
@@ -138,6 +140,7 @@ def dcf_inputs(snapshot: Snapshot, statements: Statements | None, metrics: Metri
         net_cash=cash - debt,
         growth=dcf.default_growth(metrics.get("fcf_cagr_3y"), metrics.get("revenue_cagr_3y")),
         discount=dcf.capm_discount(risk_free, to_float(snapshot.get("beta"))),
+        unit=snapshot.fx / snapshot.price_unit,
     )
 
 

@@ -73,8 +73,8 @@ def fundamentals_server(input, output, session, ctx: StockContext):
         if result is None:
             return tags.section(c.skeleton(height=320), class_="section")
         if snap.is_fund:
-            return tags.section(c.empty_state("Funds don't publish company financials",
-                                              "See Performance & Risk for how this fund has done."), class_="section")
+            return tags.section(c.empty_state(f"Company financials don't apply to {snap.kind_phrase}",
+                                              "See Performance & Risk for how it has done."), class_="section")
         if result.value is None or result.value.empty:
             return tags.section(c.empty_state("No financial statements available",
                                               result.error or "Yahoo has no annual statements for this symbol."),
@@ -93,7 +93,7 @@ def fundamentals_server(input, output, session, ctx: StockContext):
         frame = fa.income_and_cash(statements())
         if ctx.snapshot.value().is_financial:
             frame = frame.drop(columns="Free cash flow", errors="ignore")  # meaningless for banks
-        return charts.statement_bars(frame, ctx.snapshot.value().currency_symbol)
+        return charts.statement_bars(frame, ctx.snapshot.value().statement_symbol)
 
     @render_plotly
     def margins():
@@ -128,7 +128,7 @@ def fundamentals_server(input, output, session, ctx: StockContext):
     @render.ui
     def health():
         snap, m = ctx.snapshot.value(), ctx.metrics()
-        symbol = snap.currency_symbol
+        symbol = snap.statement_symbol
         cash, debt = snap.get("totalCash"), snap.get("totalDebt")
         if snap.is_financial:
             tiles = [
@@ -202,7 +202,7 @@ def fundamentals_server(input, output, session, ctx: StockContext):
         frame = fa.shareholder_payouts(statements())
         if frame.empty or not frame.abs().values.sum():
             return charts.empty_figure("No dividends or buybacks reported")
-        return charts.stacked_payouts(frame, ctx.snapshot.value().currency_symbol)
+        return charts.stacked_payouts(frame, ctx.snapshot.value().statement_symbol)
 
     @render_plotly
     def dividends():

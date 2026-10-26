@@ -58,11 +58,11 @@ def hero_server(input, output, session, ctx: StockContext, watch: Watchlist):
             )
         snap = result.value
         meta = [
-            c.pill("Market cap ", fmt.money(snap.market_cap, snap.currency_symbol), variant="soft")
+            c.pill("Market cap ", fmt.money(snap.market_cap, snap.major_symbol), variant="soft")
             if snap.market_cap else None,
             c.pill(snap.sector, variant="fog") if snap.sector else None,
             c.pill(snap.industry, variant="fog") if snap.industry else None,
-            c.pill("Fund · ", snap.quote_type.title(), variant="fog") if snap.is_fund else None,
+            c.pill(snap.kind_label, variant="fog") if snap.is_fund else None,
         ]
         if snap.next_earnings and snap.next_earnings >= date.today():
             meta.append(c.pill("Earnings ", fmt.day(snap.next_earnings), variant="outline"))

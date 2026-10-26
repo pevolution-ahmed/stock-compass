@@ -34,7 +34,26 @@ class MarketDataProvider:
     def snapshot(self, symbol: str) -> Snapshot:
         symbol = symbol.upper()
         payload = self.client.modules([symbol], SNAPSHOT_MODULES).get(symbol)
-        return normalize.snapshot(symbol, payload)
+        return self._with_fx(normalize.snapshot(symbol, payload))
+
+    def _with_fx(self, snap: Snapshot) -> Snapshot:
+        """Attach the statement-currency → quote-currency rate when they differ (TSM: TWD → USD)."""
+        if snap.financial_currency and snap.financial_currency != snap.major_currency:
+            snap.fx = self.fx_rate(snap.financial_currency, snap.major_currency)
+        return snap
+
+    @cached("rates")
+    def fx_rate(self, source: str, target: str) -> float | None:
+        if source == target:
+            return 1.0
+        pair = f"{source}{target}=X"
+        try:
+            payload = self.client.modules([pair], ["price"]).get(pair)
+            price = normalize.module(payload, "price") or (payload if isinstance(payload, dict) else {})
+            return normalize.to_float(price.get("regularMarketPrice"))
+        except Exception:
+            log.exception("FX lookup failed for %s", pair)
+            return None
 
     @cached("quote")
     def snapshots(self, symbols: tuple[str, ...]) -> dict[str, Snapshot]:
@@ -43,7 +62,7 @@ class MarketDataProvider:
         result = {}
         for symbol in symbols:
             try:
-                result[symbol] = normalize.snapshot(symbol, payload.get(symbol))
+                result[symbol] = self._with_fx(normalize.snapshot(symbol, payload.get(symbol)))
             except DataUnavailable:
                 log.info("No snapshot for %s", symbol)
         return result

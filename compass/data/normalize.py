@@ -12,7 +12,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .schemas import ESTIMATE_PERIODS, Insights, SearchResult, Snapshot, Statements
+from .schemas import ESTIMATE_PERIODS, Insights, SearchResult, Snapshot, Statements, currency_symbol, major_currency
 
 PRICE_COLUMNS = ["open", "high", "low", "close", "adjclose", "volume", "dividends"]
 
@@ -79,12 +79,15 @@ def snapshot(symbol: str, payload: Any) -> Snapshot:
         if to_float(stats.get(key)) is not None:
             stats[key] = to_float(stats[key]) / 100
 
+    currency = price.get("currency") or "USD"
+    major, price_unit = major_currency(currency)
     return Snapshot(
         symbol=symbol.upper(),
         name=price.get("longName") or price.get("shortName") or symbol.upper(),
         quote_type=str(quote_type.get("quoteType") or price.get("quoteType") or "EQUITY"),
-        currency=price.get("currency") or "USD",
-        currency_symbol=price.get("currencySymbol") or "$",
+        currency=currency,
+        # Prices quoted in a minor unit (pence) are shown as plain numbers next to the currency code
+        currency_symbol="" if price_unit != 1.0 else (price.get("currencySymbol") or currency_symbol(currency)),
         exchange=price.get("exchangeName") or price.get("exchange") or "",
         sector=profile.get("sectorDisp") or profile.get("sector"),
         industry=profile.get("industryDisp") or profile.get("industry"),
@@ -99,6 +102,8 @@ def snapshot(symbol: str, payload: Any) -> Snapshot:
         next_earnings=to_date(module(calendar, "earnings").get("earningsDate")),
         ex_dividend=to_date(calendar.get("exDividendDate")),
         stats=stats,
+        financial_currency=stats.get("financialCurrency") or major,
+        price_unit=price_unit,
     )
 
 

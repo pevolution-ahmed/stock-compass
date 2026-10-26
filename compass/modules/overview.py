@@ -25,7 +25,7 @@ def overview_ui():
                   subtitle="Returns include reinvested dividends. Risk figures cover the last 5 years."),
         tags.section(
             tags.div(
-                c.card(output_widget("growth", height="340px"), title="Growth of $10,000",
+                c.card(output_widget("growth", height="340px"), title="Growth of 10,000",
                        subtitle=f"Last 5 years vs the {config.BENCHMARK_LABEL}, dividends reinvested"),
                 c.card(ui.output_ui("notes"), title="What stands out"),
                 class_="grid grid-3-1",
@@ -126,7 +126,7 @@ def overview_server(input, output, session, ctx: StockContext):
                 c.kpi("Dividend yield", fmt.pct(m["dividend_yield"], 2)),
                 c.kpi("Sharpe ratio (5Y)", fmt.num(report.sharpe), "return per unit of risk"),
                 c.kpi("YTD return", c.delta(returns["YTD"])),
-                c.kpi("Trailing P/E", fmt.mult(m["trailing_pe"]), "of the fund's holdings"),
+                c.kpi("Trailing P/E", fmt.mult(m["trailing_pe"]), "of its holdings" if snap.quote_type == "ETF" else None),
             ]
         else:
             tiles += [
@@ -134,7 +134,7 @@ def overview_server(input, output, session, ctx: StockContext):
                       help="Price ÷ expected earnings over the next 12 months."),
                 c.kpi("Price / book", fmt.mult(m["price_to_book"]), f"ROA {fmt.pct(m['roa'], 2)}")
                 if snap.is_financial else
-                c.kpi("Free cash flow yield", fmt.pct(m["fcf_yield"]), f"FCF {fmt.money(m['fcf'], symbol)} (TTM)",
+                c.kpi("Free cash flow yield", fmt.pct(m["fcf_yield"]), f"FCF {fmt.money(m['fcf'], snap.statement_symbol)} (TTM)",
                       help="Free cash flow ÷ market cap — the cash return if you owned the whole company."),
                 c.kpi("Return on equity", fmt.pct(m["roe"]), f"Net margin {fmt.pct(m['net_margin'])}"),
                 c.kpi("Dividend yield", fmt.pct(m["dividend_yield"], 2), f"Payout {fmt.pct(m['payout_ratio'], 0)}")
@@ -147,6 +147,7 @@ def overview_server(input, output, session, ctx: StockContext):
 
     @render_plotly
     def growth():
+        symbol = ctx.snapshot.value().major_symbol
         prices = performance.trailing(ctx.prices(), 5)
         lines = {ctx.symbol(): performance.rebase(prices, 10_000)}
         bench = ctx.benchmark_prices()
@@ -154,7 +155,7 @@ def overview_server(input, output, session, ctx: StockContext):
             stock, bench = performance.align(prices, bench)
             lines = {ctx.symbol(): performance.rebase(stock, 10_000),
                      config.BENCHMARK_LABEL: performance.rebase(bench, 10_000)}
-        return charts.growth_chart(lines)
+        return charts.growth_chart(lines, prefix=symbol)
 
     @render.ui
     def notes():

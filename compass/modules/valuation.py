@@ -80,8 +80,8 @@ def valuation_server(input, output, session, ctx: StockContext):
     def multiples():
         snap = ctx.snapshot.value()
         if snap.is_fund:
-            return c.empty_state("Funds don't have company valuation multiples",
-                                 "See Performance & Risk for how this fund has done.")
+            return c.empty_state(f"Company valuation multiples don't apply to {snap.kind_phrase}",
+                                 "See Performance & Risk for how it has done.")
         m = ctx.metrics()
         context = multiples_context()
         treasury = ctx.treasury.value_or_none()
@@ -115,7 +115,7 @@ def valuation_server(input, output, session, ctx: StockContext):
                 multiple_tile("ev_ebitda", "EV / EBITDA", "Enterprise value ÷ EBITDA; ignores capital structure."),
                 multiple_tile("price_to_sales", "Price / sales"),
                 multiple_tile("price_to_book", "Price / book"),
-                c.kpi("Free cash flow yield", fmt.pct(m.get("fcf_yield")), f"FCF {fmt.money(m.get('fcf'), snap.currency_symbol)} (TTM)",
+                c.kpi("Free cash flow yield", fmt.pct(m.get("fcf_yield")), f"FCF {fmt.money(m.get('fcf'), snap.statement_symbol)} (TTM)",
                       help="Free cash flow ÷ market cap."),
             ]
         earnings_yield = m.get("earnings_yield")
@@ -221,10 +221,14 @@ def valuation_server(input, output, session, ctx: StockContext):
         if defaults() is not None:
             return None
         if snap.is_fund:
-            reason = ("Funds don't have cash flows to discount", "Valuation models apply to individual companies.")
+            reason = (f"There are no company cash flows to discount for {snap.kind_phrase}",
+                      "Valuation models apply to individual companies.")
         elif snap.is_financial:
             reason = ("A cash-flow DCF doesn't suit banks and insurers",
                       "Their cash flows mix in deposits and loans. Price/book against return on equity is the usual yardstick.")
+        elif not snap.fx:
+            reason = (f"No exchange rate for {snap.financial_currency} → {snap.major_currency}",
+                      "The financial statements and the share price use different currencies.")
         else:
             reason = ("Free cash flow is negative or unavailable",
                       "With no positive cash flow to project, a DCF would only reflect guesses about the future.")
@@ -256,8 +260,10 @@ def valuation_server(input, output, session, ctx: StockContext):
                 tags.li(tags.strong("Terminal weight: "),
                         f"{fmt.pct(result.terminal_share, 0)} of the value comes from after year 10"),
                 tags.li(tags.strong("Starting point: "),
-                        f"{fmt.money(a.fcf, symbol)} free cash flow (TTM), "
-                        f"{fmt.money(a.net_cash, symbol)} net cash, {a.shares / 1e9:,.2f}B shares"),
+                        f"{fmt.money(a.fcf, snap.statement_symbol)} free cash flow (TTM), "
+                        f"{fmt.money(a.net_cash, snap.statement_symbol)} net cash, {a.shares / 1e9:,.2f}B shares"
+                        + (f" · converted at {snap.fx:.4g} {snap.major_currency} per {snap.financial_currency}"
+                           if snap.financial_currency != snap.major_currency else "")),
                 class_="dcf-facts",
             ),
         )
@@ -288,7 +294,7 @@ def valuation_server(input, output, session, ctx: StockContext):
         result = dcf.value(a)
         req(result is not None)
         return charts.dcf_bars(result.years, result.cash_flows, result.present_values,
-                               prefix=ctx.snapshot.value().currency_symbol)
+                               prefix=ctx.snapshot.value().statement_symbol)
 
     @render.ui
     def dcf_defaults_note():

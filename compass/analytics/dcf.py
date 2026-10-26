@@ -26,6 +26,7 @@ class Assumptions:
     terminal_growth: float = 0.025
     high_years: int = 5
     fade_years: int = 5
+    unit: float = 1.0        # converts a per-share value in statement currency into the quoted price unit
 
 
 @dataclass
@@ -59,7 +60,7 @@ def value(a: Assumptions) -> Valuation | None:
     enterprise = sum(pvs) + terminal_pv
     equity = enterprise + a.net_cash
     return Valuation(
-        per_share=equity / a.shares,
+        per_share=equity / a.shares * a.unit,
         enterprise_value=enterprise,
         equity_value=equity,
         terminal_share=terminal_pv / enterprise if enterprise else float("nan"),

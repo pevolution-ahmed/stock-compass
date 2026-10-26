@@ -93,7 +93,7 @@ def analysts_server(input, output, session, ctx: StockContext):
         if result.value is None or result.value.empty:
             snap = ctx.snapshot.value_or_none()
             if snap is not None and snap.is_fund:
-                return tags.section(c.empty_state("Funds have no analyst estimates",
+                return tags.section(c.empty_state(f"Analyst estimates don't apply to {snap.kind_phrase}",
                                                   "Analyst coverage applies to individual companies."), class_="section")
             return tags.section(c.empty_state("No analyst coverage", result.error or
                                               "Yahoo has no estimates or ratings for this symbol."), class_="section")

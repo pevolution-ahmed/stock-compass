@@ -93,7 +93,7 @@ def performance_server(input, output, session, ctx: StockContext):
         result, bench = investment()
         if result is None:
             return c.empty_state("Enter an amount and a start date")
-        symbol = snap.currency_symbol
+        symbol = snap.major_symbol
         tiles = [
             c.kpi("Worth today", fmt.amount(result.final_value, symbol),
                   f"from {fmt.amount(result.invested, symbol)} on {fmt.day(result.start.date())}"),
@@ -117,7 +117,7 @@ def performance_server(input, output, session, ctx: StockContext):
         lines = {ctx.symbol(): result.value}
         if bench is not None:
             lines[config.BENCHMARK_LABEL] = bench.value
-        return charts.growth_chart(lines, prefix=ctx.snapshot.value().currency_symbol, height=300)
+        return charts.growth_chart(lines, prefix=ctx.snapshot.value().major_symbol, height=300)
 
     @render.ui
     def period_table():

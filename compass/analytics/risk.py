@@ -21,8 +21,18 @@ def monthly_returns(prices: pd.Series) -> pd.Series:
     return prices.resample("ME").last().pct_change().dropna()
 
 
-def volatility(returns: pd.Series) -> float | None:
-    return safe(returns.std() * np.sqrt(TRADING_DAYS)) if len(returns) > 1 else None
+def periods_per_year(prices: pd.Series) -> int:
+    """Observations per year: ~252 for stocks, ~365 for crypto that trades every day."""
+    if len(prices) < 30:
+        return TRADING_DAYS
+    recent = prices[prices.index > prices.index[-1] - pd.Timedelta(days=365)]
+    span = (prices.index[-1] - prices.index[0]).days
+    count = len(recent) if span >= 365 else len(prices) * 365 / max(span, 1)
+    return int(min(max(round(count), 200), 366))
+
+
+def volatility(returns: pd.Series, per_year: int = TRADING_DAYS) -> float | None:
+    return safe(returns.std() * np.sqrt(per_year)) if len(returns) > 1 else None
 
 
 def drawdown_series(prices: pd.Series) -> pd.Series:
@@ -61,19 +71,19 @@ def max_drawdown(prices: pd.Series) -> Drawdown | None:
     )
 
 
-def sharpe(returns: pd.Series, risk_free: float) -> float | None:
-    vol = volatility(returns)
+def sharpe(returns: pd.Series, risk_free: float, per_year: int = TRADING_DAYS) -> float | None:
+    vol = volatility(returns, per_year)
     if not vol:
         return None
-    return safe((returns.mean() * TRADING_DAYS - risk_free) / vol)
+    return safe((returns.mean() * per_year - risk_free) / vol)
 
 
-def sortino(returns: pd.Series, risk_free: float) -> float | None:
-    excess = returns - risk_free / TRADING_DAYS
-    downside = np.sqrt((np.minimum(excess, 0) ** 2).mean()) * np.sqrt(TRADING_DAYS)
+def sortino(returns: pd.Series, risk_free: float, per_year: int = TRADING_DAYS) -> float | None:
+    excess = returns - risk_free / per_year
+    downside = np.sqrt((np.minimum(excess, 0) ** 2).mean()) * np.sqrt(per_year)
     if not downside:
         return None
-    return safe(excess.mean() * TRADING_DAYS / downside)
+    return safe(excess.mean() * per_year / downside)
 
 
 def calmar(prices: pd.Series) -> float | None:
@@ -128,15 +138,16 @@ def risk_report(prices: pd.Series, benchmark: pd.Series | None, risk_free: float
                 years: float | None = 5) -> RiskReport:
     window = trailing(prices, years)
     returns = daily_returns(window)
+    per_year = periods_per_year(window)
     bench = trailing(benchmark, years) if benchmark is not None else None
     up, down = capture_ratios(window, bench) if bench is not None else (None, None)
     return RiskReport(
         years=(window.index[-1] - window.index[0]).days / 365.25,
-        volatility=volatility(returns),
+        volatility=volatility(returns, per_year),
         beta=beta(window, bench) if bench is not None else None,
         correlation=correlation(window, bench) if bench is not None else None,
-        sharpe=sharpe(returns, risk_free),
-        sortino=sortino(returns, risk_free),
+        sharpe=sharpe(returns, risk_free, per_year),
+        sortino=sortino(returns, risk_free, per_year),
         calmar=calmar(window),
         max_drawdown=max_drawdown(window),
         var_95=value_at_risk(returns),
