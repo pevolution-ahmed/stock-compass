@@ -90,3 +90,22 @@ Shiny.addCustomMessageHandler("compass-url", ({ symbol }) => {
 
   document.addEventListener("pointerleave", () => active && reset(active));
 })();
+
+
+// Any element with data-shiny-event="<input id>" sends its data-value to that input when clicked.
+document.addEventListener("click", (event) => {
+  const el = event.target.closest("[data-shiny-event]");
+  if (!el) return;
+  Shiny.setInputValue(el.dataset.shinyEvent, el.dataset.value, { priority: "event" });
+});
+
+// Watchlist persistence in this browser (no server storage).
+const WATCHLIST_KEY = "compass.watchlist";
+$(document).on("shiny:connected", () => {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(WATCHLIST_KEY)); } catch (e) { saved = null; }
+  Shiny.setInputValue("watchlist-saved", Array.isArray(saved) ? saved : null);
+});
+Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
+  try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(symbols)); } catch (e) { /* storage blocked */ }
+});

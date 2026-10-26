@@ -9,8 +9,8 @@ from __future__ import annotations
 import pandas as pd
 
 from ..data.normalize import to_float
-from ..data.schemas import Snapshot, Statements
-from . import dcf, fundamentals as fa, performance, technicals, valuation
+from ..data.schemas import Insights, Snapshot, Statements
+from . import dcf, fundamentals as fa, performance, sentiment, technicals, valuation
 
 Metrics = dict[str, float | None]
 
@@ -154,4 +154,21 @@ def valuation_metrics(snapshot: Snapshot, statements: Statements | None, metrics
         "pe_premium": multiples["trailing_pe"].premium,
         "dcf_value": fair.per_share if fair else None,
         "dcf_margin": fair.per_share / price - 1 if fair and price else None,
+    }
+
+
+def insight_metrics(insights: Insights | None) -> Metrics:
+    """Forward-looking analyst signals: expected growth, estimate revisions, earnings beats."""
+    if insights is None or insights.empty:
+        return {}
+    surprises = sentiment.surprise_stats(insights)
+    next_year = insights.estimates
+    return {
+        "fwd_eps_growth": (float(next_year.at["+1y", "eps_growth"])
+                           if "+1y" in next_year.index and next_year["eps_growth"].notna().get("+1y") else None),
+        "eps_revision_90d": sentiment.estimate_change(insights, "0y", 90),
+        "revision_breadth": sentiment.revision_score(insights),
+        "beat_rate": surprises.beat_rate if surprises else None,
+        "avg_surprise": surprises.average_surprise if surprises else None,
+        "bullish_share": sentiment.bullish_share(sentiment.current_ratings(insights)),
     }

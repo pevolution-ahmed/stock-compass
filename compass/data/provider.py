@@ -10,9 +10,9 @@ import pandas as pd
 from .. import config
 from . import normalize
 from .cache import cached
-from .clients import SNAPSHOT_MODULES, FixtureClient, RawClient, YahooClient
+from .clients import INSIGHT_MODULES, SNAPSHOT_MODULES, FixtureClient, RawClient, YahooClient
 from .normalize import DataUnavailable, SymbolNotFound
-from .schemas import SearchResult, Snapshot, Statements
+from .schemas import Insights, SearchResult, Snapshot, Statements
 
 __all__ = ["MarketDataProvider", "DataUnavailable", "SymbolNotFound", "default_provider"]
 
@@ -67,6 +67,11 @@ class MarketDataProvider:
     @cached("fundamentals")
     def statements(self, symbol: str) -> Statements:
         return normalize.statements(self.client.statements(symbol.upper()))
+
+    @cached("insights")
+    def insights(self, symbol: str) -> Insights:
+        symbol = symbol.upper()
+        return normalize.insights(self.client.modules([symbol], INSIGHT_MODULES).get(symbol))
 
     def risk_free_rate(self) -> float:
         """Annualized risk-free rate (13-week T-bill) as a fraction."""

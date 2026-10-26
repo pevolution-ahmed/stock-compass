@@ -16,6 +16,10 @@ SNAPSHOT_MODULES = [
     "price", "quoteType", "summaryDetail", "defaultKeyStatistics", "financialData",
     "assetProfile", "calendarEvents",
 ]
+INSIGHT_MODULES = [
+    "earningsTrend", "earningsHistory", "recommendationTrend", "upgradeDowngradeHistory",
+    "insiderTransactions", "majorHoldersBreakdown", "institutionOwnership", "netSharePurchaseActivity",
+]
 STATEMENT_KINDS = ["income", "balance", "cashflow", "valuation"]
 
 
@@ -61,11 +65,20 @@ class FixtureClient:
         return self.root / symbol.upper().replace("^", "_")
 
     def modules(self, symbols, names):
+        """Recorded modules (snapshot + insights files merged), filtered to the ones asked for."""
         result = {}
         for symbol in symbols:
-            path = self._dir(symbol) / "modules.json"
-            result[symbol] = (json.loads(path.read_text()) if path.exists()
-                              else f"Quote not found for symbol: {symbol}")
+            recorded = {}
+            for filename in ("modules.json", "insights.json"):
+                path = self._dir(symbol) / filename
+                if path.exists() and isinstance(loaded := json.loads(path.read_text()), dict):
+                    recorded.update(loaded)
+            if not recorded:
+                result[symbol] = f"Quote not found for symbol: {symbol}"
+            elif len(names) == 1 and names[0] in recorded:
+                result[symbol] = recorded[names[0]]  # Yahoo returns a single module unwrapped
+            else:
+                result[symbol] = {name: recorded[name] for name in names if name in recorded}
         return result
 
     def history(self, symbols, period):

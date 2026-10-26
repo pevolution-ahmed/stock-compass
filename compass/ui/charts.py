@@ -249,3 +249,176 @@ def dcf_bars(years: list[int], cash_flows: list[float], present_values: list[flo
     fig.update_yaxes(tickprefix=prefix, ticksuffix=suffix)
     fig.update_layout(barmode="overlay", bargap=0.35)
     return _finish(fig, height)
+
+
+# ---------- Analysts ----------
+
+RATING_COLORS = {"Strong buy": GAIN, "Buy": rgba("gain", 0.55), "Hold": PEBBLE,
+                 "Sell": rgba("loss", 0.55), "Strong sell": LOSS}
+MONTHS_AGO = {"0m": "This month", "-1m": "1 month ago", "-2m": "2 months ago", "-3m": "3 months ago"}
+
+
+def rating_trend(recommendations: pd.DataFrame, height: int = 300) -> go.Figure:
+    frame = recommendations.reindex([p for p in MONTHS_AGO if p in recommendations.index][::-1])
+    labels = [MONTHS_AGO[p] for p in frame.index]
+    fig = go.Figure([
+        go.Bar(x=labels, y=frame[column].values, name=column, marker_color=color,
+               hovertemplate="%{y} analysts<extra>" + column + "</extra>")
+        for column, color in RATING_COLORS.items() if column in frame
+    ])
+    fig.update_layout(barmode="stack", legend=dict(traceorder="normal"))
+    fig.update_xaxes(type="category")
+    return _finish(fig, height)
+
+
+def surprise_chart(surprises: pd.DataFrame, height: int = 300) -> go.Figure:
+    labels = [f"Q{(d.month - 1) // 3 + 1} {d.year}" for d in surprises.index]
+    beat = surprises["actual"] >= surprises["estimate"]
+    fig = go.Figure([
+        go.Scatter(x=labels, y=surprises["estimate"], name="Estimate", mode="markers",
+                   marker=dict(size=16, color="rgba(0,0,0,0)", line=dict(color=SECONDARY, width=2)),
+                   hovertemplate="$%{y:.2f}<extra>Estimate</extra>"),
+        go.Scatter(x=labels, y=surprises["actual"], name="Actual", mode="markers",
+                   marker=dict(size=12, color=[GAIN if b else LOSS for b in beat]),
+                   customdata=surprises["surprise"].fillna(0).values,
+                   hovertemplate="$%{y:.2f} (%{customdata:+.1%})<extra>Actual</extra>"),
+    ])
+    fig.update_yaxes(tickprefix="$")
+    fig.update_xaxes(type="category")
+    return _finish(fig, height)
+
+
+def estimate_trend(estimates: pd.DataFrame, labels: dict, height: int = 300) -> go.Figure:
+    points = [("90 days ago", "trend_90d"), ("60 days ago", "trend_60d"), ("30 days ago", "trend_30d"),
+              ("7 days ago", "trend_7d"), ("Today", "trend_current")]
+    fig = go.Figure()
+    for period, color in (("0y", INK), ("+1y", SECONDARY)):
+        if period not in estimates.index:
+            continue
+        values = [estimates.at[period, column] for _, column in points]
+        fig.add_trace(go.Scatter(x=[x for x, _ in points], y=values, name=labels[period], mode="lines+markers",
+                                 line=dict(color=color, width=2.2), marker=dict(size=7),
+                                 hovertemplate="$%{y:.2f}<extra>" + labels[period] + "</extra>"))
+    fig.update_yaxes(tickprefix="$")
+    fig.update_xaxes(type="category")
+    return _finish(fig, height)
+
+
+# ---------- Technicals ----------
+
+def price_chart(df: pd.DataFrame, overlay: str, height: int = 460) -> go.Figure:
+    """Candlesticks with an indicator overlay and volume underneath."""
+    from plotly.subplots import make_subplots
+
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.78, 0.22], vertical_spacing=0.03)
+    fig.add_trace(go.Candlestick(
+        x=df.index, open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="Price",
+        increasing=dict(line=dict(color=GAIN, width=1), fillcolor=GAIN),
+        decreasing=dict(line=dict(color=LOSS, width=1), fillcolor=LOSS),
+    ), row=1, col=1)
+
+    def line(column, name, color, width=1.6, dash="solid"):
+        return go.Scatter(x=df.index, y=df[column], name=name, mode="lines",
+                          line=dict(color=color, width=width, dash=dash),
+                          hovertemplate="%{y:.2f}<extra>" + name + "</extra>")
+
+    if overlay == "ma":
+        fig.add_trace(line("sma50", "50-day average", SECONDARY), row=1, col=1)
+        fig.add_trace(line("sma200", "200-day average", INK, 2), row=1, col=1)
+    elif overlay == "bollinger":
+        fig.add_trace(line("upper_band", "Upper band", SECONDARY, 1), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df.index, y=df["lower_band"], name="Lower band", mode="lines",
+                                 line=dict(color=SECONDARY, width=1), fill="tonexty",
+                                 fillcolor=rgba("secondary", 0.10),
+                                 hovertemplate="%{y:.2f}<extra>Lower band</extra>"), row=1, col=1)
+        fig.add_trace(line("middle_band", "20-day average", INK, 1.2, "dot"), row=1, col=1)
+    elif overlay == "ichimoku":
+        # Cloud between Span A and B: green while A is above B, red otherwise (carried over from v1)
+        label = (df["SpanA"] > df["SpanB"]).astype(int)
+        groups = label.ne(label.shift()).cumsum()
+        for _, segment in df.groupby(groups):
+            bullish = bool((segment["SpanA"] > segment["SpanB"]).iloc[0])
+            fig.add_trace(go.Scatter(x=segment.index, y=segment["SpanA"], mode="lines", line=dict(width=0),
+                                     showlegend=False, hoverinfo="skip"), row=1, col=1)
+            fig.add_trace(go.Scatter(x=segment.index, y=segment["SpanB"], mode="lines", line=dict(width=0),
+                                     fill="tonexty", fillcolor=rgba("gain" if bullish else "loss", 0.18),
+                                     showlegend=False, hoverinfo="skip"), row=1, col=1)
+        fig.add_trace(line("Conversion", "Conversion line", SECONDARY, 1.2), row=1, col=1)
+        fig.add_trace(line("Baseline", "Base line", INK, 1.6), row=1, col=1)
+        fig.add_trace(line("Lagging", "Lagging span", SLATE, 1, "dot"), row=1, col=1)
+
+    up = df["close"] >= df["open"]
+    fig.add_trace(go.Bar(x=df.index, y=df["volume"], name="Volume", showlegend=False,
+                         marker_color=[rgba("gain", 0.5) if u else rgba("loss", 0.5) for u in up],
+                         hovertemplate="%{y:,.0f}<extra>Volume</extra>"), row=2, col=1)
+    fig.update_xaxes(rangeslider_visible=False, rangebreaks=[dict(bounds=["sat", "mon"])])
+    fig.update_yaxes(tickformat="~s", row=2, col=1)
+    return _finish(fig, height)
+
+
+def rsi_chart(rsi: pd.Series, height: int = 200) -> go.Figure:
+    fig = go.Figure(go.Scatter(x=rsi.index, y=rsi.values, mode="lines", name="RSI (14)",
+                               line=dict(color=INK, width=1.6), hovertemplate="%{y:.0f}<extra>RSI</extra>"))
+    fig.add_hrect(y0=70, y1=100, fillcolor=rgba("loss", 0.07), line_width=0, layer="below")
+    fig.add_hrect(y0=0, y1=30, fillcolor=rgba("gain", 0.07), line_width=0, layer="below")
+    for level in (30, 70):
+        fig.add_hline(y=level, line=dict(color=PEBBLE, width=1, dash="dot"))
+    fig.update_yaxes(range=[0, 100], tickvals=[30, 50, 70])
+    fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
+    return _finish(fig, height, showlegend=False)
+
+
+def macd_chart(macd: pd.DataFrame, height: int = 220) -> go.Figure:
+    hist = macd["histogram"]
+    colors = [rgba("gain", 0.55) if v >= 0 else rgba("loss", 0.55) for v in hist.fillna(0)]
+    fig = go.Figure([
+        go.Bar(x=macd.index, y=hist, name="Histogram", marker_color=colors,
+               hovertemplate="%{y:.2f}<extra>Histogram</extra>"),
+        go.Scatter(x=macd.index, y=macd["macd"], name="MACD", mode="lines", line=dict(color=INK, width=1.6),
+                   hovertemplate="%{y:.2f}<extra>MACD</extra>"),
+        go.Scatter(x=macd.index, y=macd["signal"], name="Signal", mode="lines",
+                   line=dict(color=SECONDARY, width=1.4, dash="dot"), hovertemplate="%{y:.2f}<extra>Signal</extra>"),
+    ])
+    fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
+    return _finish(fig, height)
+
+
+# ---------- Watchlist ----------
+
+SERIES_STYLES = [(INK, "solid"), (SECONDARY, "solid"), (INK_2, "solid"), (SLATE, "solid"), (GAIN, "solid"),
+                 (INK, "dot"), (SECONDARY, "dot"), (INK_2, "dot"), (SLATE, "dot"), (GAIN, "dot"),
+                 (PEBBLE, "solid"), (PEBBLE, "dot")]
+
+
+def spread_labels(values: list[float], min_gap: float) -> list[float]:
+    """Nudge end-of-line label positions apart so none overlap (keeps their order)."""
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    placed = [0.0] * len(values)
+    previous = None
+    for i in order:
+        y = values[i] if previous is None else max(values[i], previous + min_gap)
+        placed[i] = previous = y
+    return placed
+
+
+def comparison_chart(lines: dict, height: int = 380) -> go.Figure:
+    """Total return since the period start for several series, each labeled at its end."""
+    fig = go.Figure()
+    styled = list(zip(lines.items(), SERIES_STYLES))
+    finals = []
+    for (label, series), (color, dash) in styled:
+        series = downsample(series) / 100 - 1  # rebased-to-100 input → return since start
+        finals.append((label, series.index[-1], float(series.iloc[-1]), color))
+        fig.add_trace(go.Scatter(x=series.index, y=series.values, name=label, mode="lines",
+                                 line=dict(color=color, width=2, dash=dash),
+                                 hovertemplate="%{y:+.1%}<extra>" + label + "</extra>"))
+    if finals:
+        values = [v for _, _, v, _ in finals]
+        all_y = pd.concat([trace_y for trace_y in (pd.Series(t.y) for t in fig.data)])
+        gap = (float(all_y.max()) - float(all_y.min())) * 0.045 or 0.01
+        for (label, x, value, color), y in zip(finals, spread_labels(values, gap)):
+            fig.add_annotation(x=x, y=y, text=f"{label} {value * 100:+.0f}%", showarrow=False, xanchor="left",
+                               xshift=8, font=dict(color=color, size=11))
+    fig.add_hline(y=0, line=dict(color=PEBBLE, width=1, dash="dot"))
+    fig.update_yaxes(side="left", tickformat="+.0%")
+    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=120, t=8, b=8))

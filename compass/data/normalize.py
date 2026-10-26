@@ -12,7 +12,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .schemas import SearchResult, Snapshot, Statements
+from .schemas import ESTIMATE_PERIODS, Insights, SearchResult, Snapshot, Statements
 
 PRICE_COLUMNS = ["open", "high", "low", "close", "adjclose", "volume", "dividends"]
 
@@ -169,3 +169,80 @@ def search_results(raw: Any, limit: int) -> list[SearchResult]:
             exchange=quote.get("exchDisp") or quote.get("exchange", ""),
         ))
     return results[:limit]
+
+
+def _lower_keys(payload: dict) -> dict:
+    return {str(k).lower(): v for k, v in payload.items()} if isinstance(payload, dict) else {}
+
+
+def _frame(rows: list[dict], columns: dict[str, str], date_column: str | None = None) -> pd.DataFrame:
+    """Rows of Yahoo dicts → DataFrame with renamed columns (missing keys become NaN)."""
+    if not rows:
+        return pd.DataFrame(columns=list(columns.values()))
+    frame = pd.DataFrame([{new: row.get(old) for old, new in columns.items()} for row in rows])
+    if date_column and date_column in frame:
+        frame[date_column] = pd.to_datetime([str(v)[:10] if v else None for v in frame[date_column]],
+                                            errors="coerce")
+    return frame
+
+
+def insights(payload: Any) -> Insights:
+    if not isinstance(payload, dict):
+        return Insights()
+
+    rows = []
+    for trend in module(payload, "earningsTrend").get("trend", []) or []:
+        if trend.get("period") not in ESTIMATE_PERIODS:
+            continue
+        eps, revenue = trend.get("earningsEstimate") or {}, trend.get("revenueEstimate") or {}
+        eps_trend = trend.get("epsTrend") or {}
+        revisions = _lower_keys(trend.get("epsRevisions") or {})
+        rows.append({
+            "period": trend.get("period"), "end": to_date(trend.get("endDate")),
+            "eps_avg": to_float(eps.get("avg")), "eps_low": to_float(eps.get("low")),
+            "eps_high": to_float(eps.get("high")), "eps_year_ago": to_float(eps.get("yearAgoEps")),
+            "eps_growth": to_float(eps.get("growth")), "eps_analysts": to_float(eps.get("numberOfAnalysts")),
+            "rev_avg": to_float(revenue.get("avg")), "rev_low": to_float(revenue.get("low")),
+            "rev_high": to_float(revenue.get("high")), "rev_growth": to_float(revenue.get("growth")),
+            "rev_analysts": to_float(revenue.get("numberOfAnalysts")),
+            "trend_current": to_float(eps_trend.get("current")), "trend_7d": to_float(eps_trend.get("7daysAgo")),
+            "trend_30d": to_float(eps_trend.get("30daysAgo")), "trend_60d": to_float(eps_trend.get("60daysAgo")),
+            "trend_90d": to_float(eps_trend.get("90daysAgo")),
+            "up_7d": to_float(revisions.get("uplast7days")), "up_30d": to_float(revisions.get("uplast30days")),
+            "down_7d": to_float(revisions.get("downlast7days")), "down_30d": to_float(revisions.get("downlast30days")),
+        })
+    estimates = pd.DataFrame(rows).set_index("period") if rows else pd.DataFrame()
+
+    surprises = _frame(module(payload, "earningsHistory").get("history", []) or [],
+                       {"quarter": "quarter", "epsActual": "actual", "epsEstimate": "estimate",
+                        "surprisePercent": "surprise"}, "quarter")
+    surprises = surprises.dropna(subset=["quarter", "actual"]).sort_values("quarter").set_index("quarter") \
+        if not surprises.empty else surprises
+
+    recommendations = _frame(module(payload, "recommendationTrend").get("trend", []) or [],
+                             {"period": "period", "strongBuy": "Strong buy", "buy": "Buy", "hold": "Hold",
+                              "sell": "Sell", "strongSell": "Strong sell"})
+    recommendations = recommendations.set_index("period") if not recommendations.empty else recommendations
+
+    grades = _frame(module(payload, "upgradeDowngradeHistory").get("history", []) or [],
+                    {"epochGradeDate": "date", "firm": "firm", "fromGrade": "from", "toGrade": "to",
+                     "action": "action", "priceTargetAction": "target_action",
+                     "currentPriceTarget": "target", "priorPriceTarget": "prior_target"}, "date")
+    grades = grades.sort_values("date", ascending=False).reset_index(drop=True) if not grades.empty else grades
+
+    insider_trades = _frame(module(payload, "insiderTransactions").get("transactions", []) or [],
+                            {"startDate": "date", "filerName": "name", "filerRelation": "relation",
+                             "transactionText": "text", "shares": "shares", "value": "value"}, "date")
+    insider_trades = (insider_trades.sort_values("date", ascending=False).reset_index(drop=True)
+                      if not insider_trades.empty else insider_trades)
+
+    institutions = _frame(module(payload, "institutionOwnership").get("ownershipList", []) or [],
+                          {"organization": "holder", "pctHeld": "pct_held", "position": "shares",
+                           "value": "value", "pctChange": "pct_change", "reportDate": "reported"}, "reported")
+
+    return Insights(
+        estimates=estimates, surprises=surprises, recommendations=recommendations, grades=grades,
+        insider_trades=insider_trades, institutions=institutions,
+        insider_summary=module(payload, "netSharePurchaseActivity"),
+        holders=module(payload, "majorHoldersBreakdown"),
+    )

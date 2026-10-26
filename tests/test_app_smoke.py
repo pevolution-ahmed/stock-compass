@@ -39,6 +39,10 @@ INITIAL_INPUTS = {
     "valuation-growth": 8,
     "valuation-discount": 9,
     "valuation-terminal": 2.5,
+    "technicals-overlay": "ma",
+    "technicals-period": "12",
+    "watchlist-period": "12",
+    "watchlist-add-query": "",
 }
 
 # Flag output → outputs (or id prefixes ending in "-") its conditional panel hides when the flag is "no"
@@ -46,9 +50,11 @@ CONDITIONAL = {
     "valuation-dcf_available": ["valuation-dcf_result", "valuation-dcf_chart", "valuation-sensitivity",
                                 "valuation-dcf_defaults_note"],
     "fundamentals-applicable": ["fundamentals-"],
+    "analysts-applicable": ["analysts-"],
 }
 # Outputs that legitimately render nothing in some states
-MAY_BE_EMPTY = {"fundamentals-not_applicable", "valuation-dcf_unavailable", "valuation-history_picker"}
+MAY_BE_EMPTY = {"fundamentals-not_applicable", "valuation-dcf_unavailable", "valuation-history_picker",
+                "analysts-not_applicable"}
 
 
 def free_port() -> int:

@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from compass.data.clients import SNAPSHOT_MODULES, STATEMENT_KINDS, YahooClient  # noqa: E402
+from compass.data.clients import INSIGHT_MODULES, SNAPSHOT_MODULES, STATEMENT_KINDS, YahooClient  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures"
 SEARCH_QUERIES = ["micro", "nvid"]
@@ -33,6 +33,9 @@ def record(symbol: str, client: YahooClient) -> None:
 
     if symbol.startswith("^"):
         return
+    insights = client.modules([symbol], INSIGHT_MODULES).get(symbol)
+    if isinstance(insights, dict):
+        (out / "insights.json").write_text(json.dumps(insights, indent=1, default=str))
     statements = client.statements(symbol)
     for kind in STATEMENT_KINDS:
         frame = statements.get(kind)

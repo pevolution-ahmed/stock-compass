@@ -10,10 +10,11 @@ A one-stop investor dashboard for any stock, built with Shiny for Python: return
 - **Performance & Risk** — "if you had invested…" calculator (with or without dividend reinvestment), total returns by period, volatility, drawdowns, Sharpe/Sortino/Calmar, beta, value at risk, up/down capture, calendar-year and monthly returns.
 - **Valuation** — multiples against their own ~4-year median, valuation history, analyst targets, and an adjustable two-stage DCF with reverse DCF (the growth today's price implies) and a sensitivity grid.
 - **Fundamentals** — revenue, profit and free cash flow trends, margins, ROIC/ROE, debt and liquidity, Altman Z-score, an itemized Piotroski F-score, dividends and buybacks.
+- **Analysts** — consensus EPS and revenue estimates, how estimates moved over 90 days, revisions up vs down, earnings surprises and beat rate, rating mix, recent rating and price-target changes, institutional holders, insider transactions and short interest.
+- **Technicals** — candlesticks with moving averages, Bollinger Bands or the Ichimoku cloud (both carried over from v1), RSI, MACD and a plain-language signal summary.
+- **Watchlist** — saved in your browser; compare price moves, valuation, analyst upside and quick scores side by side, chart total returns against the S&P 500, and open any name in one click. Use ☆ Watch on any stock to add it.
 - Banks, insurers and funds get metrics that suit them; models that don't apply say so instead of showing misleading numbers.
 - Search any ticker, or open one directly with `?symbol=NVDA`.
-
-Analysts & Ownership, Technicals and a Watchlist are in progress.
 
 ## Run it
 
@@ -25,7 +26,7 @@ uv pip install --python .venv -r requirements-dev.txt
 
 Then open http://127.0.0.1:8000.
 
-To work offline against recorded data, set `COMPASS_FIXTURES=tests/fixtures` before starting the app. Refresh the recordings with `python scripts/record_fixtures.py MSFT JPM SPY ^IRX`.
+To work offline against recorded data, set `COMPASS_FIXTURES=tests/fixtures` before starting the app. Refresh the recordings with `python scripts/record_fixtures.py MSFT JPM SPY ^IRX ^TNX`.
 
 ## Tests
 
@@ -45,7 +46,8 @@ compass/
   data/                the only code that talks to Yahoo; normalizes and caches its answers
   analytics/           pure pandas/numpy: returns, risk, metrics, scoring (no Shiny imports)
   ui/                  formatting, components, Plotly theme and chart builders
-  modules/             one Shiny module per feature (search, hero, overview, performance, valuation, fundamentals)
+  modules/             one Shiny module per feature (search, hero, overview, performance, valuation,
+                       fundamentals, analysts, technicals, watchlist)
   ui/palette.py        the color palette — single source for CSS variables and charts
   www/                 type/spacing tokens (from DESIGN.md), styles, scripts, logo
 tests/                 analytics unit tests, end-to-end smoke test, recorded fixtures

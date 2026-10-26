@@ -49,6 +49,14 @@ def num(value, decimals: int = 2) -> str:
     return MISSING if is_missing(value) else f"{value:,.{decimals}f}"
 
 
+def count(value) -> str:
+    """Compact share counts: 1,234 · 56.8K · 3.59M."""
+    if is_missing(value):
+        return MISSING
+    return money(value, symbol="", compact=abs(value) >= 1e4, decimals=2 if abs(value) >= 1e6 else 1) \
+        if abs(value) >= 1e4 else f"{value:,.0f}"
+
+
 def integer(value) -> str:
     return MISSING if is_missing(value) else f"{value:,.0f}"
 

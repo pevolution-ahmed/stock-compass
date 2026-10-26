@@ -20,7 +20,7 @@ from . import config
 from .analytics import metrics as metric_set
 from .analytics import scoring
 from .data.provider import DataUnavailable, MarketDataProvider
-from .data.schemas import Snapshot, Statements
+from .data.schemas import Insights, Snapshot, Statements
 
 log = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -78,6 +78,7 @@ class StockContext:
     snapshot: Resource[Snapshot]
     history: Resource[pd.DataFrame]
     statements: Resource[Statements]
+    insights: Resource[Insights]
     benchmark: Resource[pd.DataFrame]
     risk_free: Resource[float]
     treasury: Resource[float]
@@ -98,6 +99,7 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
     snapshot = Resource(provider.snapshot)
     history = Resource(provider.history)
     statements = Resource(provider.statements)
+    insights = Resource(provider.insights)
     benchmark = Resource(provider.history)
     risk_free = Resource(provider.risk_free_rate)
     treasury = Resource(provider.treasury_10y)
@@ -115,6 +117,7 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
         snapshot.load(current)
         history.load(current)
         statements.load(current)
+        insights.load(current)
 
     @reactive.calc
     def prices() -> pd.Series:
@@ -135,6 +138,7 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
         if st is not None:
             result.update(metric_set.statement_metrics(snap, st))
             result.update(metric_set.valuation_metrics(snap, st, result, rate()))
+        result.update(metric_set.insight_metrics(insights.value_or_none()))
         return result
 
     def rate() -> float:
@@ -145,5 +149,41 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
         snap = snapshot.value()
         return scoring.score_pillars(metrics(), is_financial=snap.is_financial, is_fund=snap.is_fund)
 
-    return StockContext(provider, symbol, snapshot, history, statements, benchmark, risk_free, treasury,
+    return StockContext(provider, symbol, snapshot, history, statements, insights, benchmark, risk_free, treasury,
                         prices, benchmark_prices, metrics, pillars)
+
+
+class Watchlist:
+    """The visitor's saved tickers, shared by the header's Watch button and the Watchlist tab."""
+
+    MAX = 12
+
+    def __init__(self, initial: list[str] = config.DEFAULT_WATCHLIST):
+        self.symbols: reactive.Value[list[str]] = reactive.value(list(initial))
+
+    def _current(self) -> list[str]:
+        with reactive.isolate():
+            return list(self.symbols())
+
+    def replace(self, symbols: list[str]) -> None:
+        cleaned = []
+        for symbol in symbols:
+            symbol = symbol.strip().upper()
+            if symbol and symbol not in cleaned:
+                cleaned.append(symbol)
+        self.symbols.set(cleaned[: self.MAX])
+
+    def add(self, symbol: str) -> None:
+        current = self._current()
+        symbol = (symbol or "").strip().upper()
+        if symbol and symbol not in current and len(current) < self.MAX:
+            self.symbols.set(current + [symbol])
+
+    def remove(self, symbol: str) -> None:
+        self.symbols.set([s for s in self._current() if s != (symbol or "").upper()])
+
+    def toggle(self, symbol: str) -> None:
+        (self.remove if (symbol or "").upper() in self._current() else self.add)(symbol)
+
+    def contains(self, symbol: str) -> bool:
+        return (symbol or "").upper() in self.symbols()

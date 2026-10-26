@@ -18,11 +18,14 @@ from . import config
 from .data.provider import default_provider
 from .modules.hero import hero_server, hero_ui
 from .modules.overview import overview_server, overview_ui
+from .modules.analysts import analysts_server, analysts_ui
 from .modules.fundamentals import fundamentals_server, fundamentals_ui
 from .modules.performance import performance_server, performance_ui
 from .modules.search import search_server, search_ui
+from .modules.technicals import technicals_server, technicals_ui
 from .modules.valuation import valuation_server, valuation_ui
-from .state import create_context
+from .modules.watchlist import watchlist_server, watchlist_ui
+from .state import Watchlist, create_context
 from .ui import charts  # noqa: F401 — registers the Plotly template
 from .ui.palette import ROLES, css_variables, logo_svg
 
@@ -59,6 +62,9 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Performance & Risk", performance_ui("performance")),
     ui.nav_panel("Valuation", valuation_ui("valuation")),
     ui.nav_panel("Fundamentals", fundamentals_ui("fundamentals")),
+    ui.nav_panel("Analysts", analysts_ui("analysts")),
+    ui.nav_panel("Technicals", technicals_ui("technicals")),
+    ui.nav_panel("Watchlist", watchlist_ui("watchlist")),
     title=brand,
     id="tabs",
     window_title=config.APP_NAME,
@@ -86,12 +92,21 @@ def server(input, output, session):
         initial = symbol_from_query(input[".clientdata_url_search"]())
     ctx = create_context(provider, initial)
 
+    watch = Watchlist()
+
+    def open_symbol(symbol: str) -> None:
+        ctx.select(symbol)
+        ui.update_navs("tabs", selected="Overview", session=session)
+
     search_server("search", provider=provider, on_pick=ctx.select)
-    hero_server("hero", ctx=ctx)
+    hero_server("hero", ctx=ctx, watch=watch)
     overview_server("overview", ctx=ctx)
     performance_server("performance", ctx=ctx)
     valuation_server("valuation", ctx=ctx)
     fundamentals_server("fundamentals", ctx=ctx)
+    analysts_server("analysts", ctx=ctx)
+    technicals_server("technicals", ctx=ctx)
+    watchlist_server("watchlist", provider=provider, watch=watch, ctx=ctx, on_open=open_symbol)
 
     @reactive.effect
     async def _sync_url():

@@ -89,11 +89,17 @@ def range_bar(low, high, value, left_label: str, right_label: str, caption: str 
     )
 
 
-def table(headers: Iterable[str], rows: Iterable[Iterable[TagChild]], class_: str = "") -> Tag:
+def table(headers: Iterable[str], rows: Iterable[Iterable[TagChild]], class_: str = "",
+          align: str | None = None) -> Tag:
+    """Simple table. ``align`` is one letter per column ("l"/"r"); by default the first column is
+    left-aligned and the rest (usually numbers) right-aligned."""
+    headers = list(headers)
+    align = align or "l" + "r" * (len(headers) - 1)
+    cls = lambda i: "left" if i < len(align) and align[i] == "l" else None
     return tags.div(
         tags.table(
-            tags.thead(tags.tr(*[tags.th(h) for h in headers])),
-            tags.tbody(*[tags.tr(*[tags.td(cell) for cell in row]) for row in rows]),
+            tags.thead(tags.tr(*[tags.th(h, class_=cls(i)) for i, h in enumerate(headers)])),
+            tags.tbody(*[tags.tr(*[tags.td(cell, class_=cls(i)) for i, cell in enumerate(row)]) for row in rows]),
             class_=f"c-table {class_}".strip(),
         ),
         class_="table-scroll",

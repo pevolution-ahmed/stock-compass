@@ -80,3 +80,24 @@ class Statements:
     @property
     def empty(self) -> bool:
         return self.income.empty and self.balance.empty and self.cashflow.empty
+
+
+ESTIMATE_PERIODS = {"0q": "This quarter", "+1q": "Next quarter", "0y": "This fiscal year", "+1y": "Next fiscal year"}
+
+
+@dataclass
+class Insights:
+    """Analyst estimates, earnings surprises, ratings and ownership for one company."""
+
+    estimates: pd.DataFrame = field(default_factory=pd.DataFrame)      # one row per ESTIMATE_PERIODS key
+    surprises: pd.DataFrame = field(default_factory=pd.DataFrame)      # quarterly actual vs estimate EPS
+    recommendations: pd.DataFrame = field(default_factory=pd.DataFrame)  # rating counts per month (0m, -1m, …)
+    grades: pd.DataFrame = field(default_factory=pd.DataFrame)         # rating / target changes, newest first
+    insider_trades: pd.DataFrame = field(default_factory=pd.DataFrame)
+    institutions: pd.DataFrame = field(default_factory=pd.DataFrame)
+    insider_summary: dict = field(default_factory=dict)
+    holders: dict = field(default_factory=dict)
+
+    @property
+    def empty(self) -> bool:
+        return all(frame.empty for frame in (self.estimates, self.surprises, self.recommendations, self.grades))

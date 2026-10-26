@@ -23,6 +23,7 @@ CACHE_TTL = {
     "quote": 60,
     "history": 15 * 60,
     "fundamentals": 12 * 60 * 60,
+    "insights": 60 * 60,
     "search": 60 * 60,
     "rates": 60 * 60,
 }

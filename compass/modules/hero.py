@@ -5,10 +5,10 @@ from __future__ import annotations
 from datetime import date
 
 from htmltools import TagChild, tags
-from shiny import module, render, ui
+from shiny import module, reactive, render, ui
 
 from .. import config
-from ..state import StockContext
+from ..state import StockContext, Watchlist
 from ..ui import components as c
 from ..ui import formatting as fmt
 
@@ -28,7 +28,22 @@ def hero_ui(search: TagChild):
 
 
 @module.server
-def hero_server(input, output, session, ctx: StockContext):
+def hero_server(input, output, session, ctx: StockContext, watch: Watchlist):
+    @render.ui
+    def watch_button():
+        symbol = ctx.symbol()
+        watching = watch.contains(symbol)
+        return tags.button("★ Watching" if watching else "☆ Watch", type="button",
+                           class_="pill " + ("pill-soft" if watching else "pill-outline"),
+                           aria_pressed="true" if watching else "false",
+                           title=("Remove from" if watching else "Add to") + " your watchlist",
+                           data_shiny_event=session.ns("toggle"), data_value=symbol)
+
+    @reactive.effect
+    @reactive.event(input.toggle)
+    def _toggle():
+        watch.toggle(input.toggle())
+
     @render.ui
     def quote():
         result = ctx.snapshot.result()
@@ -56,6 +71,7 @@ def hero_server(input, output, session, ctx: StockContext):
                 tags.h1(snap.name, class_="hero-name"),
                 c.pill(snap.symbol, variant="ink"),
                 c.pill(snap.exchange, variant="fog") if snap.exchange else None,
+                ui.output_ui("watch_button", inline=True),
                 class_="hero-id",
             ),
             tags.div(tags.span(snap.currency_symbol, class_="currency"), fmt.num(snap.price),

@@ -108,6 +108,8 @@ PILLARS: dict[str, tuple[str, list[Rule]]] = {
         Rule("earnings_growth", "Earnings growth (YoY)", 0.0, 0.25),
         Rule("revenue_cagr_3y", "Revenue growth (3-yr CAGR)", 0.0, 0.15),
         Rule("eps_cagr_3y", "EPS growth (3-yr CAGR)", 0.0, 0.15),
+        Rule("fwd_eps_growth", "Expected EPS growth (next fiscal year)", 0.0, 0.20,
+             help="Analysts' consensus growth for next fiscal year's earnings per share."),
     ]),
     "Health": ("Can the balance sheet take a hit?", [
         Rule("debt_to_equity", "Debt / equity", 2.0, 0.3, "x", financials="exclude"),
@@ -128,6 +130,8 @@ PILLARS: dict[str, tuple[str, list[Rule]]] = {
         Rule("vs_sma200", "Price vs 200-day average", -0.10, 0.15),
         Rule("sma50_vs_sma200", "50-day vs 200-day average", -0.05, 0.05),
         Rule("relative_1y", "1Y return vs S&P 500", -0.20, 0.20),
+        Rule("eps_revision_90d", "Earnings estimate revisions (90 days)", -0.05, 0.05,
+             help="Change in this year's consensus EPS estimate over the last 90 days."),
     ]),
 }
 
