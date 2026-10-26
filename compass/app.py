@@ -21,6 +21,7 @@ from .modules.performance import performance_server, performance_ui
 from .modules.search import search_server, search_ui
 from .state import create_context
 from .ui import charts  # noqa: F401 — registers the Plotly template
+from .ui.palette import ROLES, css_variables
 
 WWW = Path(__file__).parent / "www"
 
@@ -29,6 +30,7 @@ head = ui.head_content(
     tags.link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
     tags.link(rel="stylesheet",
               href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"),
+    tags.style(css_variables()),
     tags.link(rel="stylesheet", href="css/tokens.css"),
     tags.link(rel="stylesheet", href="css/app.css"),
     tags.link(rel="icon", type="image/svg+xml", href="img/logo.svg"),
@@ -39,6 +41,7 @@ head = ui.head_content(
 brand = tags.span(
     tags.img(src="img/logo.svg", class_="brand-mark", alt=""),
     tags.span(config.APP_NAME, class_="brand-name"),
+    class_="brand",
 )
 
 footer = tags.footer(
@@ -54,7 +57,7 @@ app_ui = ui.page_navbar(
     id="tabs",
     window_title=config.APP_NAME,
     lang="en",
-    header=tags.div(head, ui.busy_indicators.options(spinner_color="#163300", pulse_background="#9fe870",
+    header=tags.div(head, ui.busy_indicators.options(spinner_color=ROLES["ink"], pulse_background=ROLES["accent"],
                                                        pulse_height="3px", fade_opacity=0.5),
                     hero_ui("hero", search_ui("search"))),
     footer=footer,

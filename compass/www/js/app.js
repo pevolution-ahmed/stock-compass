@@ -55,3 +55,38 @@ Shiny.addCustomMessageHandler("compass-url", ({ symbol }) => {
   url.searchParams.set("symbol", symbol);
   window.history.replaceState(null, "", url);
 });
+
+// Scorecard parallax: tilt the hovered pillar toward the pointer; CSS layers it by depth.
+// Mouse/pen only, and off when the visitor prefers reduced motion.
+(() => {
+  const MAX_TILT = 9; // degrees
+  const canTilt = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+  let active = null;
+  let frame = 0;
+
+  const reset = (card) => {
+    card.classList.remove("is-tilting");
+    for (const name of ["--rx", "--ry", "--mx", "--my"]) card.style.removeProperty(name);
+  };
+
+  document.addEventListener("pointermove", (event) => {
+    if (!canTilt.matches) return;
+    const card = event.target.closest(".pillar");
+    if (active && active !== card) reset(active);
+    active = card;
+    if (!card) return;
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      const box = card.getBoundingClientRect();
+      const x = Math.min(Math.max((event.clientX - box.left) / box.width - 0.5, -0.5), 0.5);
+      const y = Math.min(Math.max((event.clientY - box.top) / box.height - 0.5, -0.5), 0.5);
+      card.style.setProperty("--rx", `${(-y * MAX_TILT).toFixed(2)}deg`);
+      card.style.setProperty("--ry", `${(x * MAX_TILT).toFixed(2)}deg`);
+      card.style.setProperty("--mx", x.toFixed(3));
+      card.style.setProperty("--my", y.toFixed(3));
+      card.classList.add("is-tilting");
+    });
+  });
+
+  document.addEventListener("pointerleave", () => active && reset(active));
+})();

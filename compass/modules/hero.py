@@ -54,7 +54,7 @@ def hero_server(input, output, session, ctx: StockContext):
         return tags.div(
             tags.div(
                 tags.h1(snap.name, class_="hero-name"),
-                c.pill(snap.symbol, variant="forest"),
+                c.pill(snap.symbol, variant="ink"),
                 c.pill(snap.exchange, variant="fog") if snap.exchange else None,
                 class_="hero-id",
             ),

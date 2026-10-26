@@ -1,6 +1,6 @@
-"""Plotly theme and figure builders in the DESIGN.md palette.
+"""Plotly theme and figure builders using the roles in ``palette``.
 
-Lime is used only for fills; lines and text use Forest Ink, Signal Blue and the
+The accent is used only for fills; lines and text use ink, secondary and the
 neutrals so they stay readable on white.
 """
 
@@ -13,29 +13,29 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
 
-FOREST = "#163300"
-LIME = "#9fe870"
-SPRUCE = "#054d28"
-LINEN = "#e2f6d5"
-SIGNAL_BLUE = "#0b4c72"
-ALARM = "#cb272f"
-CHARCOAL = "#454745"
-PEBBLE = "#868685"
-SLATE = "#6a6c6a"
-FOG = "#e8ebe6"
+from .palette import ROLES, rgba
+
+INK = ROLES["ink"]
+SECONDARY = ROLES["secondary"]
+GAIN = ROLES["gain"]
+LOSS = ROLES["loss"]
+CHARCOAL = ROLES["charcoal"]
+PEBBLE = ROLES["pebble"]
+SLATE = ROLES["slate"]
+FOG = ROLES["fog"]
 FONT = "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
 
-STOCK_COLOR = FOREST
-BENCH_COLOR = SIGNAL_BLUE
+STOCK_COLOR = INK
+BENCH_COLOR = SECONDARY
 
 pio.templates["compass"] = go.layout.Template(layout=go.Layout(
     font=dict(family=FONT, color=CHARCOAL, size=13),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    colorway=[FOREST, SIGNAL_BLUE, SPRUCE, PEBBLE, SLATE, ALARM],
+    colorway=[INK, SECONDARY, ROLES["accent"], PEBBLE, SLATE, LOSS],
     margin=dict(l=8, r=8, t=8, b=8),
     hovermode="x unified",
-    hoverlabel=dict(bgcolor=FOREST, bordercolor=FOREST, font=dict(family=FONT, color="#ffffff", size=12)),
+    hoverlabel=dict(bgcolor=INK, bordercolor=INK, font=dict(family=FONT, color="#ffffff", size=12)),
     legend=dict(orientation="h", x=0, y=1.02, yanchor="bottom", bgcolor="rgba(0,0,0,0)",
                 font=dict(size=12), title=None),
     xaxis=dict(showgrid=False, linecolor=FOG, ticks="", zeroline=False, automargin=True,
@@ -79,7 +79,7 @@ def growth_chart(lines: dict[str, pd.Series], prefix: str = "$", height: int = 3
             x=series.index, y=series.values, name=label, mode="lines",
             line=dict(color=STOCK_COLOR if is_stock else BENCH_COLOR, width=2.5 if is_stock else 1.8),
             fill="tozeroy" if is_stock else None,
-            fillcolor="rgba(159, 232, 112, 0.18)" if is_stock else None,
+            fillcolor=rgba("accent", 0.14) if is_stock else None,
             hovertemplate=f"{prefix}%{{y:,.0f}}<extra>{label}</extra>",
         ))
     values = pd.concat(lines.values())
@@ -95,9 +95,9 @@ def drawdown_chart(lines: dict[str, pd.Series], height: int = 260) -> go.Figure:
         is_stock = i == 0
         fig.add_trace(go.Scatter(
             x=series.index, y=series.values, name=label, mode="lines",
-            line=dict(color=ALARM if is_stock else BENCH_COLOR, width=1.6 if is_stock else 1.2),
+            line=dict(color=LOSS if is_stock else BENCH_COLOR, width=1.6 if is_stock else 1.2),
             fill="tozeroy" if is_stock else None,
-            fillcolor="rgba(203, 39, 47, 0.12)" if is_stock else None,
+            fillcolor=rgba("loss", 0.12) if is_stock else None,
             hovertemplate="%{y:.1%}<extra>" + label + "</extra>",
         ))
     deepest = min(float(s.min()) for s in lines.values()) if lines else -0.1
@@ -112,8 +112,9 @@ def calendar_bars(stock: pd.Series, benchmark: pd.Series | None, stock_label: st
     years = ["YTD" if y == current_year else str(y) for y in stock.index]
     fig.add_trace(go.Bar(
         x=years, y=stock.values, name=stock_label,
-        marker=dict(color=[SPRUCE if v >= 0 else ALARM for v in stock.values]),
+        marker=dict(color=[GAIN if v >= 0 else LOSS for v in stock.values]),
         hovertemplate="%{y:+.1%}<extra>" + stock_label + "</extra>",
+        showlegend=False,  # bars are colored by sign, so a single legend swatch would mislead
     ))
     if benchmark is not None:
         bench = benchmark.reindex(stock.index)
@@ -136,7 +137,7 @@ def monthly_heatmap(table: pd.DataFrame, height: int | None = None) -> go.Figure
     fig = go.Figure(go.Heatmap(
         z=values, x=months, y=[str(y) for y in table.index],
         zmin=-limit, zmax=limit,
-        colorscale=[[0, ALARM], [0.5, "#f4f6f3"], [1, SPRUCE]],
+        colorscale=[[0, LOSS], [0.5, "#f5f6fa"], [1, GAIN]],
         text=text, texttemplate="%{text}", textfont=dict(size=11),
         hovertemplate="%{x} %{y}: %{z:+.1%}<extra></extra>",
         showscale=False, xgap=2, ygap=2,

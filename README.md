@@ -43,7 +43,8 @@ compass/
   analytics/           pure pandas/numpy: returns, risk, metrics, scoring (no Shiny imports)
   ui/                  formatting, components, Plotly theme and chart builders
   modules/             one Shiny module per feature (search, hero, overview, performance)
-  www/                 design tokens (from DESIGN.md), styles, scripts, logo
+  ui/palette.py        the color palette — single source for CSS variables and charts
+  www/                 type/spacing tokens (from DESIGN.md), styles, scripts, logo
 tests/                 analytics unit tests, end-to-end smoke test, recorded fixtures
 ```
 
