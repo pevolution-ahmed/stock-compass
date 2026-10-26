@@ -13,8 +13,11 @@ A one-stop investor dashboard for any stock, built with Shiny for Python: return
 - **Analysts** — consensus EPS and revenue estimates, how estimates moved over 90 days, revisions up vs down, earnings surprises and beat rate, rating mix, recent rating and price-target changes, institutional holders, insider transactions and short interest.
 - **Technicals** — candlesticks with moving averages, Bollinger Bands or the Ichimoku cloud (both carried over from v1), RSI, MACD and a plain-language signal summary.
 - **Watchlist** — saved in your browser; compare price moves, valuation, analyst upside and quick scores side by side, chart total returns against the S&P 500, and open any name in one click. Use ☆ Watch on any stock to add it.
-- Banks, insurers and funds get metrics that suit them; models that don't apply say so instead of showing misleading numbers.
+- Banks, insurers, funds, indices and crypto get metrics that suit them; models that don't apply say so instead of showing misleading numbers.
+- Foreign listings are handled: statements in another currency are converted at the live FX rate (TSMC reports in TWD), London prices in pence are kept apart from pound amounts, and each figure is labeled in its own currency.
 - Search any ticker, or open one directly with `?symbol=NVDA`.
+- A loading screen shows which data has arrived; a small indicator appears while a tab is still drawing.
+- Light and dark mode (☾ / ☀ in the header), remembered per browser.
 
 ## Run it
 
@@ -26,7 +29,9 @@ uv pip install --python .venv -r requirements-dev.txt
 
 Then open http://127.0.0.1:8000.
 
-To work offline against recorded data, set `COMPASS_FIXTURES=tests/fixtures` before starting the app. Refresh the recordings with `python scripts/record_fixtures.py MSFT JPM SPY ^IRX ^TNX`.
+To work offline against recorded data, set `COMPASS_FIXTURES=tests/fixtures` before starting the app.
+
+To use another color theme, set `COMPASS_THEME` to one of `indigo-sky` (default), `forest-lime`, `midnight-gold`, `graphite-mint`, `plum-peach` or `ocean-coral`; the light/dark switch pairs each with a matching dark theme. Themes live in `compass/ui/palette.py`. Refresh the recordings with `python scripts/record_fixtures.py MSFT JPM SPY ^IRX ^TNX`.
 
 ## Tests
 
@@ -48,7 +53,7 @@ compass/
   ui/                  formatting, components, Plotly theme and chart builders
   modules/             one Shiny module per feature (search, hero, overview, performance, valuation,
                        fundamentals, analysts, technicals, watchlist)
-  ui/palette.py        the color palette — single source for CSS variables and charts
+  ui/palette.py        color themes (light and dark) — single source for CSS variables and charts
   www/                 type/spacing tokens (from DESIGN.md), styles, scripts, logo
 tests/                 analytics unit tests, end-to-end smoke test, recorded fixtures
 ```
@@ -59,3 +64,4 @@ Modules only read from `StockContext`, so a new section is one file in `compass/
 
 - `v1.0.0` — the original 2023 technical analyzer (Shiny 0.2.9).
 - `v1.1.0` — the same app ported to current Shiny, pandas and yahooquery.
+- `v2.0.0` — Stock Compass, the investor dashboard.
