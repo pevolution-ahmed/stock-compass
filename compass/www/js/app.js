@@ -109,3 +109,59 @@ $(document).on("shiny:connected", () => {
 Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
   try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(symbols)); } catch (e) { /* storage blocked */ }
 });
+
+
+// Loading overlay: visible from first paint, then driven by the server's progress messages.
+(() => {
+  const loader = document.getElementById("compass-loader");
+  if (!loader) return;
+  const $ = (id) => document.getElementById(id);
+  let dismissedFor = null;   // symbol the visitor chose to stop waiting for
+  let currentSymbol = null;
+  let slowTimer = null;
+  let hideTimer = null;
+
+  const show = () => { loader.classList.add("is-visible"); document.body.classList.add("loader-open"); };
+  const hide = () => {
+    loader.classList.remove("is-visible");
+    document.body.classList.remove("loader-open");
+    clearTimeout(slowTimer);
+  };
+  document.body.classList.add("loader-open");
+  // Name the requested ticker right away, before the server has said anything
+  const requested = new URLSearchParams(window.location.search).get("symbol");
+  if (requested && /^[A-Za-z0-9.^=-]{1,15}$/.test(requested)) {
+    $("compass-loader-title").textContent = `Gathering ${requested.toUpperCase()}'s data`;
+  }
+
+  $("compass-loader-skip").addEventListener("click", () => { dismissedFor = currentSymbol; hide(); });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && loader.classList.contains("is-visible")) { dismissedFor = currentSymbol; hide(); }
+  });
+
+  Shiny.addCustomMessageHandler("compass-loader", (msg) => {
+    if (msg.symbol !== currentSymbol) {
+      currentSymbol = msg.symbol;
+      clearTimeout(slowTimer);
+      slowTimer = setTimeout(() => {
+        $("compass-loader-sub").textContent = "Yahoo Finance is responding slowly. You can keep waiting or look at what's ready.";
+      }, 20000);
+      $("compass-loader-sub").textContent =
+        "Prices, financials and analyst data come from several sources, so this takes a few seconds.";
+    }
+    $("compass-loader-title").textContent = `Gathering ${msg.name || msg.symbol}'s data`;
+    const percent = Math.max(4, Math.round(msg.fraction * 100));
+    $("compass-loader-fill").style.width = `${percent}%`;
+    $("compass-loader-bar").setAttribute("aria-valuenow", String(percent));
+    for (const step of msg.steps) {
+      const item = loader.querySelector(`[data-step="${step.key}"]`);
+      if (item) item.className = step.state;
+    }
+    clearTimeout(hideTimer);
+    if (msg.done) {
+      hideTimer = setTimeout(hide, 450);  // let the bar reach 100% first
+    } else if (dismissedFor !== msg.symbol) {
+      show();
+    }
+  });
+})();

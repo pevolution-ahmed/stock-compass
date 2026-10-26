@@ -7,6 +7,9 @@ tests and offline development use exactly what Yahoo returned.
 from __future__ import annotations
 
 import json
+import random
+import threading
+import time
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -31,25 +34,73 @@ class RawClient(Protocol):
 
 
 class YahooClient:
-    def _ticker(self, symbols: list[str]):
+    """Talks to Yahoo through yahooquery without repeating its slow session setup.
+
+    A fresh yahooquery Ticker visits Yahoo's homepage for a cookie before its first
+    request (~1–1.5s). Instead, one set of cookies is fetched per ``SESSION_TTL``
+    and cloned into a session per worker thread (HTTP sessions aren't guaranteed
+    thread-safe); after any failure the cookies are refreshed in case they went stale.
+    """
+
+    SESSION_TTL = 30 * 60
+
+    def __init__(self):
+        self._local = threading.local()
+        self._lock = threading.Lock()
+        self._template = None  # (browser, cookies, created)
+
+    def _cookies(self, fresh: bool):
+        from curl_cffi import requests as curl
+        from yahooquery.constants import BROWSERS
+        from yahooquery.session_management import setup_session
+
+        with self._lock:
+            if fresh or self._template is None or time.monotonic() - self._template[2] > self.SESSION_TTL:
+                browser = random.choice(list(BROWSERS))
+                session = setup_session(curl.Session(headers=BROWSERS[browser], impersonate=browser))
+                self._template = (browser, list(session.cookies.jar), time.monotonic())
+            return self._template
+
+    def _session(self, fresh: bool = False):
+        from curl_cffi import requests as curl
+        from yahooquery.constants import BROWSERS
+
+        browser, cookies, created = self._cookies(fresh)
+        if fresh or getattr(self._local, "created", None) != created:
+            session = curl.Session(headers=BROWSERS[browser], impersonate=browser)
+            for cookie in cookies:
+                session.cookies.jar.set_cookie(cookie)
+            self._local.session, self._local.created = session, created
+        return self._local.session
+
+    def _ticker(self, symbols: list[str], fresh: bool = False):
+        from requests_futures.sessions import FuturesSession
         from yahooquery import Ticker
 
-        return Ticker(symbols, asynchronous=len(symbols) > 1)
+        session = self._session(fresh)
+        if len(symbols) > 1:  # batch requests fan out over a small thread pool, as yahooquery does itself
+            session = FuturesSession(max_workers=8, session=session)
+        return Ticker(symbols, session=session, asynchronous=len(symbols) > 1)
+
+    def _call(self, symbols: list[str], fetch):
+        try:
+            return fetch(self._ticker(symbols))
+        except Exception:  # stale cookie or dropped connection: retry once on a new session
+            return fetch(self._ticker(symbols, fresh=True))
 
     def modules(self, symbols, names):
-        return self._ticker(symbols).get_modules(names)
+        return self._call(symbols, lambda t: t.get_modules(names))
 
     def history(self, symbols, period):
-        return self._ticker(symbols).history(period=period, interval="1d")
+        return self._call(symbols, lambda t: t.history(period=period, interval="1d"))
 
     def statements(self, symbol):
-        ticker = self._ticker([symbol])
-        return {
-            "income": ticker.income_statement("a"),
-            "balance": ticker.balance_sheet("a"),
-            "cashflow": ticker.cash_flow("a"),
-            "valuation": ticker.valuation_measures,
-        }
+        return self._call([symbol], lambda t: {
+            "income": t.income_statement("a"),
+            "balance": t.balance_sheet("a"),
+            "cashflow": t.cash_flow("a"),
+            "valuation": t.valuation_measures,
+        })
 
     def search(self, query):
         from yahooquery import search

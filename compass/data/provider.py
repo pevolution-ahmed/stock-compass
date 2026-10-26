@@ -95,6 +95,25 @@ class MarketDataProvider:
         return rate / 100 if rate else fallback
 
 
+    def warm(self, symbols: list[str]) -> None:
+        """Prefetch into the shared cache (and warm HTTP sessions); errors are only logged."""
+        from concurrent.futures import ThreadPoolExecutor
+
+        jobs = [self.risk_free_rate, self.treasury_10y]
+        for symbol in symbols:
+            jobs += [lambda s=symbol: self.snapshot(s), lambda s=symbol: self.history(s),
+                     lambda s=symbol: self.statements(s), lambda s=symbol: self.insights(s)]
+
+        def run(job):
+            try:
+                job()
+            except Exception:
+                log.info("Warm-up fetch failed", exc_info=True)
+
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            list(pool.map(run, jobs))
+
+
 _default: MarketDataProvider | None = None
 
 

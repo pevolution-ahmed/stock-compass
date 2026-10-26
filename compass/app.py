@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import re
+import threading
 from pathlib import Path
 from urllib.parse import parse_qs
 
@@ -17,6 +18,7 @@ from shiny import App, reactive, ui
 from . import config
 from .data.provider import default_provider
 from .modules.hero import hero_server, hero_ui
+from .modules.loader import loader_server, loader_ui
 from .modules.overview import overview_server, overview_ui
 from .modules.analysts import analysts_server, analysts_ui
 from .modules.fundamentals import fundamentals_server, fundamentals_ui
@@ -30,12 +32,14 @@ from .ui import charts  # noqa: F401 — registers the Plotly template
 from .ui.palette import ROLES, css_variables, logo_svg
 
 WWW = Path(__file__).parent / "www"
+FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
 
 head = ui.head_content(
     tags.link(rel="preconnect", href="https://fonts.googleapis.com"),
     tags.link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
-    tags.link(rel="stylesheet",
-              href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"),
+    # Load the web font without blocking first paint (the loader must appear immediately)
+    tags.link(rel="preload", as_="style", href=FONT_URL, onload="this.onload=null;this.rel='stylesheet'"),
+    tags.noscript(tags.link(rel="stylesheet", href=FONT_URL)),
     tags.style(css_variables()),
     tags.link(rel="stylesheet", href="css/tokens.css"),
     tags.link(rel="stylesheet", href="css/app.css"),
@@ -71,7 +75,7 @@ app_ui = ui.page_navbar(
     lang="en",
     header=tags.div(head, ui.busy_indicators.options(spinner_color=ROLES["ink"], pulse_background=ROLES["accent"],
                                                        pulse_height="3px", fade_opacity=0.5),
-                    hero_ui("hero", search_ui("search"))),
+                    loader_ui("loader"), hero_ui("hero", search_ui("search"))),
     footer=footer,
     navbar_options=ui.navbar_options(bg="#ffffff", theme="light", underline=False),
 )
@@ -99,6 +103,7 @@ def server(input, output, session):
         ui.update_navs("tabs", selected="Overview", session=session)
 
     search_server("search", provider=provider, on_pick=ctx.select)
+    loader_server("loader", ctx=ctx)
     hero_server("hero", ctx=ctx, watch=watch)
     overview_server("overview", ctx=ctx)
     performance_server("performance", ctx=ctx)
@@ -114,3 +119,7 @@ def server(input, output, session):
 
 
 app = App(app_ui, server, static_assets=WWW)
+
+# Prefetch the default stock and the benchmark so the first visitor doesn't wait on Yahoo
+threading.Thread(target=default_provider().warm, args=([config.DEFAULT_SYMBOL, config.BENCHMARK_SYMBOL],),
+                 daemon=True, name="compass-warmup").start()
