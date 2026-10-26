@@ -80,6 +80,7 @@ class StockContext:
     statements: Resource[Statements]
     benchmark: Resource[pd.DataFrame]
     risk_free: Resource[float]
+    treasury: Resource[float]
     prices: Callable[[], pd.Series]
     benchmark_prices: Callable[[], pd.Series | None]
     metrics: Callable[[], dict[str, Any]]
@@ -99,11 +100,13 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
     statements = Resource(provider.statements)
     benchmark = Resource(provider.history)
     risk_free = Resource(provider.risk_free_rate)
+    treasury = Resource(provider.treasury_10y)
 
     @reactive.effect
     def _load_shared():
         benchmark.load(config.BENCHMARK_SYMBOL)
         risk_free.load()
+        treasury.load()
 
     @reactive.effect
     @reactive.event(symbol)
@@ -125,15 +128,22 @@ def create_context(provider: MarketDataProvider, initial_symbol: str = config.DE
     @reactive.calc
     def metrics() -> dict[str, Any]:
         snap = snapshot.value()
-        result = metric_set.snapshot_metrics(snap, statements.value_or_none())
+        st = statements.value_or_none()
+        result = metric_set.snapshot_metrics(snap, st)
         if history.value_or_none() is not None:
             result.update(metric_set.price_metrics(prices(), benchmark_prices()))
+        if st is not None:
+            result.update(metric_set.statement_metrics(snap, st))
+            result.update(metric_set.valuation_metrics(snap, st, result, rate()))
         return result
+
+    def rate() -> float:
+        return risk_free.value_or_none() or config.RISK_FREE_FALLBACK
 
     @reactive.calc
     def pillars() -> list[scoring.PillarScore]:
         snap = snapshot.value()
         return scoring.score_pillars(metrics(), is_financial=snap.is_financial, is_fund=snap.is_fund)
 
-    return StockContext(provider, symbol, snapshot, history, statements, benchmark, risk_free,
+    return StockContext(provider, symbol, snapshot, history, statements, benchmark, risk_free, treasury,
                         prices, benchmark_prices, metrics, pillars)

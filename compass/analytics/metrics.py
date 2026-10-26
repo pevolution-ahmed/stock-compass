@@ -10,7 +10,7 @@ import pandas as pd
 
 from ..data.normalize import to_float
 from ..data.schemas import Snapshot, Statements
-from . import performance, technicals
+from . import dcf, fundamentals as fa, performance, technicals, valuation
 
 Metrics = dict[str, float | None]
 
@@ -94,4 +94,64 @@ def price_metrics(prices: pd.Series, benchmark: pd.Series | None = None) -> Metr
         "sma50_vs_sma200": ratio(sma50, sma200) - 1 if sma50 and sma200 else None,
         "relative_1y": one_year - bench_year if one_year is not None and bench_year is not None else None,
         "rsi14": performance.safe(rsi),
+    }
+
+
+def statement_metrics(snapshot: Snapshot, statements: Statements | None) -> Metrics:
+    """Quality, health and growth metrics that need the annual statements."""
+    if statements is None or statements.empty:
+        return {}
+    st = statements
+    f_score = fa.piotroski_score(fa.piotroski(st))
+    altman = None if snapshot.is_financial else fa.altman_z(st, snapshot.market_cap)
+    fcf = ttm_value(st, "cashflow", "FreeCashFlow")
+    net_income = ttm_value(st, "income", "NetIncome")
+    return {
+        "roic": fa.roic(st),
+        "fcf_conversion": ratio(fcf, net_income) if net_income and net_income > 0 else None,
+        "interest_coverage": fa.interest_coverage(st),
+        # Scaled to 9 so banks, where some tests can't be run, stay comparable
+        "piotroski": f_score[0] / f_score[1] * 9 if f_score else None,
+        "altman_z": altman.score if altman else None,
+        "revenue_cagr_3y": fa.cagr(fa.col(st.income, "TotalRevenue")),
+        "eps_cagr_3y": fa.cagr(fa.col(st.income, "DilutedEPS")),
+        "fcf_cagr_3y": fa.cagr(fa.col(st.cashflow, "FreeCashFlow")),
+        "equity_to_assets": fa.div(fa.latest(st.balance, "StockholdersEquity"), fa.latest(st.balance, "TotalAssets")),
+        "buyback_yield": fa.buyback_yield(st, snapshot.market_cap),
+    }
+
+
+def dcf_inputs(snapshot: Snapshot, statements: Statements | None, metrics: Metrics,
+               risk_free: float) -> dcf.Assumptions | None:
+    """Default DCF assumptions, or None when a cash-flow DCF doesn't fit (funds, banks, negative FCF)."""
+    if statements is None or statements.empty or snapshot.is_fund or snapshot.is_financial:
+        return None
+    fcf = metrics.get("fcf")
+    shares = to_float(snapshot.get("sharesOutstanding")) or to_float(snapshot.get("impliedSharesOutstanding"))
+    if not fcf or fcf <= 0 or not shares:
+        return None
+    cash = to_float(snapshot.get("totalCash")) or 0.0
+    debt = to_float(snapshot.get("totalDebt")) or 0.0
+    return dcf.Assumptions(
+        fcf=fcf,
+        shares=shares,
+        net_cash=cash - debt,
+        growth=dcf.default_growth(metrics.get("fcf_cagr_3y"), metrics.get("revenue_cagr_3y")),
+        discount=dcf.capm_discount(risk_free, to_float(snapshot.get("beta"))),
+    )
+
+
+def valuation_metrics(snapshot: Snapshot, statements: Statements | None, metrics: Metrics,
+                      risk_free: float) -> Metrics:
+    """Metrics comparing today's price with history and with the default DCF."""
+    if statements is None:
+        return {}
+    multiples = valuation.context(statements.valuation, metrics)
+    assumptions = dcf_inputs(snapshot, statements, metrics, risk_free)
+    fair = dcf.value(assumptions) if assumptions else None
+    price = snapshot.price
+    return {
+        "pe_premium": multiples["trailing_pe"].premium,
+        "dcf_value": fair.per_share if fair else None,
+        "dcf_margin": fair.per_share / price - 1 if fair and price else None,
     }

@@ -11,7 +11,7 @@ BRAND = {
     "indigo-900": "#3A3E98",
     "indigo-600": "#5256BC",
     "steel-500": "#527CBC",
-    "sky-400": "#4AB1D8",
+    "sky-400": "#bcedff",
 }
 
 ROLES = {
@@ -51,3 +51,16 @@ def css_variables() -> str:
     """``:root`` block exposing every role as ``--<role>`` plus ``--<role>-rgb`` for alpha use."""
     lines = [f"  --{name}: {value};\n  --{name}-rgb: {rgb(value)};" for name, value in ROLES.items()]
     return ":root {\n" + "\n".join(lines) + "\n}"
+
+
+def logo_svg(size: int = 32) -> str:
+    """Compass-needle mark in the current palette."""
+    ink, accent, secondary = ROLES["ink"], ROLES["accent"], ROLES["secondary"]
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="{size}" height="{size}" '
+        f'fill="none" aria-hidden="true">'
+        f'<circle cx="16" cy="16" r="16" fill="{ink}"/>'
+        f'<path d="M16 6 20 16 16 26 12 16Z" fill="{accent}"/>'
+        f'<path d="M16 16 20 16 16 26Z" fill="{secondary}"/>'
+        f'<circle cx="16" cy="16" r="2" fill="{ink}"/></svg>'
+    )

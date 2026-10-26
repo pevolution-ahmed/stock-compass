@@ -55,7 +55,13 @@ def integer(value) -> str:
 
 def by_kind(value, kind: str) -> str:
     """Format by a short kind name, as used by scoring rules."""
-    return {"pct": pct, "x": mult, "ratio": num}.get(kind, num)(value)
+    return {"pct": pct, "x": mult, "ratio": num, "f9": out_of_nine}.get(kind, num)(value)
+
+
+def out_of_nine(value) -> str:
+    if is_missing(value):
+        return MISSING
+    return f"{value:.0f}/9" if abs(value - round(value)) < 0.05 else f"{value:.1f}/9"
 
 
 def day(value: date | None) -> str:

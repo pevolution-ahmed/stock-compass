@@ -145,3 +145,107 @@ def monthly_heatmap(table: pd.DataFrame, height: int | None = None) -> go.Figure
     fig.update_yaxes(type="category", side="left", showgrid=False)
     fig.update_xaxes(side="top")
     return _finish(fig, height or max(220, 28 * len(table) + 60), hovermode="closest")
+
+
+INK_2 = ROLES["ink-2"]
+
+
+def money_scale(*arrays) -> tuple[float, str]:
+    """Divisor and suffix so money axes read $120B rather than d3's $120G."""
+    values = [abs(float(v)) for array in arrays for v in array if pd.notna(v)]
+    peak = max(values) if values else 0
+    for limit, suffix in ((1e12, "T"), (1e9, "B"), (1e6, "M"), (1e3, "K")):
+        if peak >= limit:
+            return limit, suffix
+    return 1.0, ""
+
+
+def money_hover(prefix: str, suffix: str, label: str) -> str:
+    return f"{prefix}%{{y:,.1f}}{suffix}<extra>{label}</extra>"
+
+
+def multiple_history(series: pd.Series, label: str, median: float | None, height: int = 300) -> go.Figure:
+    """A valuation multiple over time with its median and full range for context."""
+    fig = go.Figure()
+    if median is not None and len(series):
+        fig.add_hrect(y0=float(series.min()), y1=float(series.max()), fillcolor=rgba("secondary", 0.07),
+                      line_width=0, layer="below")
+        fig.add_hline(y=median, line=dict(color=SECONDARY, width=1.2, dash="dash"),
+                      annotation_text=f"median {median:.1f}", annotation_position="top left",
+                      annotation_font=dict(color=SLATE, size=11))
+    fig.add_trace(go.Scatter(x=series.index, y=series.values, name=label, mode="lines+markers",
+                             line=dict(color=INK, width=2.2), marker=dict(size=5, color=INK),
+                             hovertemplate="%{y:.1f}<extra>" + label + "</extra>"))
+    fig.update_layout(showlegend=False)
+    return _finish(fig, height)
+
+
+def statement_bars(frame: pd.DataFrame, prefix: str = "$", height: int = 320) -> go.Figure:
+    """Grouped bars per fiscal year (e.g. revenue, net income, free cash flow)."""
+    fig = go.Figure()
+    colors = [INK, SECONDARY, SLATE, INK_2]
+    years = [f"FY{d.year}" for d in frame.index]
+    divisor, suffix = money_scale(frame.values.ravel())
+    for color, column in zip(colors, frame.columns):
+        fig.add_trace(go.Bar(x=years, y=frame[column].values / divisor, name=column, marker_color=color,
+                             hovertemplate=money_hover(prefix, suffix, column)))
+    fig.update_yaxes(tickprefix=prefix, ticksuffix=suffix)
+    fig.update_layout(barmode="group", hovermode="x unified")
+    return _finish(fig, height)
+
+
+def margin_lines(frame: pd.DataFrame, height: int = 320) -> go.Figure:
+    fig = go.Figure()
+    styles = {"Gross": (INK, "solid"), "Operating": (INK_2, "solid"), "Net": (SECONDARY, "solid"),
+              "Free cash flow": (SLATE, "dot")}
+    years = [f"FY{d.year}" for d in frame.index]
+    for column in frame.columns:
+        color, dash = styles.get(column, (PEBBLE, "solid"))
+        series = frame[column]
+        fig.add_trace(go.Scatter(x=years, y=series.values, name=column, mode="lines+markers",
+                                 line=dict(color=color, width=2, dash=dash), marker=dict(size=6),
+                                 hovertemplate="%{y:.1%}<extra>" + column + "</extra>"))
+        last = series.dropna()
+        if not last.empty:
+            # Label each line at its end so similar hues are never ambiguous
+            fig.add_annotation(x=years[frame.index.get_loc(last.index[-1])], y=float(last.iloc[-1]),
+                               text=f"{column} {last.iloc[-1] * 100:.0f}%", showarrow=False, xanchor="left",
+                               xshift=10, font=dict(color=color, size=12))
+    fig.update_yaxes(tickformat=".0%", side="left")
+    fig.update_xaxes(type="category")
+    return _finish(fig, height, showlegend=False, margin=dict(l=8, r=120, t=8, b=8))
+
+
+def stacked_payouts(frame: pd.DataFrame, prefix: str = "$", height: int = 300) -> go.Figure:
+    fig = go.Figure()
+    years = [f"FY{d.year}" for d in frame.index]
+    divisor, suffix = money_scale(frame.sum(axis=1).values, frame.values.ravel())
+    for color, column in zip([INK, SECONDARY], frame.columns):
+        fig.add_trace(go.Bar(x=years, y=frame[column].values / divisor, name=column, marker_color=color,
+                             hovertemplate=money_hover(prefix, suffix, column)))
+    fig.update_yaxes(tickprefix=prefix, ticksuffix=suffix)
+    fig.update_layout(barmode="relative")
+    return _finish(fig, height)
+
+
+def dividend_bars(by_year: pd.Series, prefix: str = "$", height: int = 300) -> go.Figure:
+    fig = go.Figure(go.Bar(x=[str(y) for y in by_year.index], y=by_year.values, marker_color=INK,
+                           hovertemplate=f"{prefix}%{{y:.2f}} per share<extra></extra>"))
+    fig.update_yaxes(tickprefix=prefix)
+    fig.update_xaxes(type="category")
+    return _finish(fig, height, hovermode="closest")
+
+
+def dcf_bars(years: list[int], cash_flows: list[float], present_values: list[float],
+             prefix: str = "$", height: int = 280) -> go.Figure:
+    labels = [f"Y{y}" for y in years]
+    divisor, suffix = money_scale(cash_flows)
+    fig = go.Figure([
+        go.Bar(x=labels, y=[v / divisor for v in cash_flows], name="Projected free cash flow",
+               marker_color=rgba("secondary", 0.45), hovertemplate=money_hover(prefix, suffix, "Projected")),
+        go.Bar(x=labels, y=[v / divisor for v in present_values], name="Worth today (discounted)",
+               marker_color=INK, hovertemplate=money_hover(prefix, suffix, "Present value")),
+    ])
+    fig.update_yaxes(tickprefix=prefix, ticksuffix=suffix)
+    fig.update_layout(barmode="overlay", bargap=0.35)
+    return _finish(fig, height)

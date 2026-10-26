@@ -6,22 +6,25 @@ server call below.
 
 from __future__ import annotations
 
+import base64
 import re
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from htmltools import tags
+from htmltools import HTML, tags
 from shiny import App, reactive, ui
 
 from . import config
 from .data.provider import default_provider
 from .modules.hero import hero_server, hero_ui
 from .modules.overview import overview_server, overview_ui
+from .modules.fundamentals import fundamentals_server, fundamentals_ui
 from .modules.performance import performance_server, performance_ui
 from .modules.search import search_server, search_ui
+from .modules.valuation import valuation_server, valuation_ui
 from .state import create_context
 from .ui import charts  # noqa: F401 — registers the Plotly template
-from .ui.palette import ROLES, css_variables
+from .ui.palette import ROLES, css_variables, logo_svg
 
 WWW = Path(__file__).parent / "www"
 
@@ -33,13 +36,14 @@ head = ui.head_content(
     tags.style(css_variables()),
     tags.link(rel="stylesheet", href="css/tokens.css"),
     tags.link(rel="stylesheet", href="css/app.css"),
-    tags.link(rel="icon", type="image/svg+xml", href="img/logo.svg"),
+    tags.link(rel="icon", type="image/svg+xml",
+              href="data:image/svg+xml;base64," + base64.b64encode(logo_svg().encode()).decode()),
     tags.meta(name="description", content=config.APP_TAGLINE),
     tags.script(src="js/app.js", defer=""),
 )
 
 brand = tags.span(
-    tags.img(src="img/logo.svg", class_="brand-mark", alt=""),
+    tags.span(HTML(logo_svg()), class_="brand-mark"),
     tags.span(config.APP_NAME, class_="brand-name"),
     class_="brand",
 )
@@ -53,6 +57,8 @@ footer = tags.footer(
 app_ui = ui.page_navbar(
     ui.nav_panel("Overview", overview_ui("overview")),
     ui.nav_panel("Performance & Risk", performance_ui("performance")),
+    ui.nav_panel("Valuation", valuation_ui("valuation")),
+    ui.nav_panel("Fundamentals", fundamentals_ui("fundamentals")),
     title=brand,
     id="tabs",
     window_title=config.APP_NAME,
@@ -84,6 +90,8 @@ def server(input, output, session):
     hero_server("hero", ctx=ctx)
     overview_server("overview", ctx=ctx)
     performance_server("performance", ctx=ctx)
+    valuation_server("valuation", ctx=ctx)
+    fundamentals_server("fundamentals", ctx=ctx)
 
     @reactive.effect
     async def _sync_url():

@@ -421,3 +421,82 @@ button.pill-outline:hover { background: var(--wash); }
 /* Shiny error output: keep it on-brand */
 .shiny-output-error { color: var(--loss); }
 .shiny-output-error-validation { color: var(--slate); }
+
+/* ---------- Phase 2: valuation & fundamentals ---------- */
+
+.grid-kpi-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .grid-kpi-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mt-3 { margin-top: var(--spacing-24) !important; }
+
+/* Pill buttons */
+.btn-pill-outline, .btn-pill-outline:focus {
+  border-radius: var(--radius-buttons); border: 1px solid var(--ink); background: var(--paper); color: var(--ink);
+  padding: 8px 18px; font-weight: var(--font-weight-medium); font-size: var(--text-caption);
+}
+.btn-pill-outline:hover { background: var(--wash); color: var(--ink); border-color: var(--ink); }
+
+/* Sliders (ion.rangeSlider) */
+.irs--shiny .irs-bar { background: var(--ink); border-color: var(--ink); }
+.irs--shiny .irs-handle { border-color: var(--ink); box-shadow: none; }
+.irs--shiny .irs-handle:hover, .irs--shiny .irs-handle.state_hover { background: var(--wash); }
+.irs--shiny .irs-single { background: var(--ink); font-family: var(--font-inter); font-weight: 600; }
+.irs--shiny .irs-line { background: var(--fog); border: 0; }
+.irs--shiny .irs-min, .irs--shiny .irs-max { background: var(--fog); color: var(--slate); }
+.irs--shiny .irs-grid-text { color: var(--pebble); }
+
+/* DCF result */
+.fair-value {
+  font-weight: var(--font-weight-black); font-size: clamp(44px, 6vw, var(--text-heading));
+  line-height: 1; letter-spacing: -0.04em; color: var(--obsidian); margin: 10px 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+.fair-value .currency { font-size: 0.45em; vertical-align: 0.8em; margin-right: 3px; letter-spacing: 0; }
+.dcf-facts { list-style: none; padding: 0; margin: var(--spacing-20) 0 0; display: grid; gap: 8px; font-size: var(--text-caption); }
+.dcf-facts li { background: var(--fog); border-radius: var(--radius-cards); padding: 10px 14px; }
+.dcf-facts strong { color: var(--obsidian); font-weight: var(--font-weight-semibold); }
+
+.sensitivity td { text-align: center; }
+.sensitivity td, .sensitivity th { padding: 8px 4px; }
+.sensitivity .cell { display: inline-block; padding: 4px 6px; border-radius: 8px; font-size: var(--text-micro); }
+.sensitivity .cell.up { background: var(--gain-wash); color: var(--gain); }
+.sensitivity .cell.down { background: var(--loss-wash); color: var(--loss); }
+.sensitivity .cell.current { box-shadow: inset 0 0 0 2px var(--ink); font-weight: 700; }
+
+/* Analyst target range */
+.target { position: relative; height: 8px; border-radius: 9999px; background: var(--fog); margin: 48px 0 8px; }
+.target-band { position: absolute; top: 0; bottom: 0; border-radius: 9999px; background: rgba(var(--secondary-rgb), 0.35); }
+.target-mark { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; box-shadow: 0 0 0 3px var(--paper); }
+.target-mark span { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: var(--text-micro); font-weight: 600; }
+.target-mark.mean { background: var(--secondary); }
+.target-mark.mean span { color: var(--secondary); }
+.target-mark.now { background: var(--ink); }
+.target-mark.now span { color: var(--ink); bottom: auto; top: 20px; }
+.target + .range-labels { margin-top: 34px; }
+
+/* Altman zone bar */
+.z-score { font-weight: var(--font-weight-black); font-size: 52px; line-height: 1; letter-spacing: -0.04em; color: var(--obsidian); }
+.zones { position: relative; display: flex; height: 28px; border-radius: 9999px; margin: 18px 0 6px; }
+.zone { display: flex; align-items: center; justify-content: center; font-size: var(--text-micro); font-weight: 600; }
+.zone:first-child { border-radius: 9999px 0 0 9999px; }
+.zone:nth-last-child(2) { border-radius: 0 9999px 9999px 0; }
+.zone.down { background: var(--loss-wash); color: var(--loss); }
+.zone.flat { background: var(--fog); color: var(--slate); }
+.zone.up { background: var(--gain-wash); color: var(--gain); }
+.zone-marker { position: absolute; top: -5px; bottom: -5px; width: 4px; margin-left: -2px; border-radius: 4px; background: var(--ink); box-shadow: 0 0 0 2px var(--paper); }
+.zone-ticks { position: relative; height: 16px; font-size: var(--text-micro); color: var(--pebble); }
+.zone-ticks span { position: absolute; transform: translateX(-50%); }
+.z-parts { margin-top: var(--spacing-16); }
+.z-parts summary { cursor: pointer; color: var(--slate); }
+
+/* Pass / fail checklist */
+.checks { list-style: none; padding: 0; margin: var(--spacing-20) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--spacing-12); }
+@media (max-width: 900px) { .checks { grid-template-columns: minmax(0, 1fr); } }
+.checks li { display: flex; gap: 12px; align-items: flex-start; background: var(--fog); border-radius: var(--radius-cards); padding: 14px 16px; }
+.check-icon { flex: 0 0 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+.check-icon.pass { background: var(--gain-wash); color: var(--gain); }
+.check-icon.fail { background: var(--loss-wash); color: var(--loss); }
+.check-icon.na { background: var(--paper); color: var(--pebble); }
+.check-name { font-weight: var(--font-weight-semibold); color: var(--obsidian); font-size: var(--text-caption); }
+.check-detail { font-size: var(--text-micro); color: var(--slate); margin-top: 2px; }
+
+.c-card-head .segmented { margin-left: auto; }

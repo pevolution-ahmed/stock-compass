@@ -68,18 +68,26 @@ class MarketDataProvider:
     def statements(self, symbol: str) -> Statements:
         return normalize.statements(self.client.statements(symbol.upper()))
 
-    @cached("rates")
     def risk_free_rate(self) -> float:
-        """Annualized risk-free rate as a fraction (T-bill yield is quoted in percent)."""
+        """Annualized risk-free rate (13-week T-bill) as a fraction."""
+        return self.index_rate(config.RISK_FREE_SYMBOL, config.RISK_FREE_FALLBACK)
+
+    def treasury_10y(self) -> float:
+        """10-year Treasury yield as a fraction, for comparing earnings yields."""
+        return self.index_rate(config.TREASURY_10Y_SYMBOL, config.TREASURY_10Y_FALLBACK)
+
+    @cached("rates")
+    def index_rate(self, symbol: str, fallback: float) -> float:
+        """Yield indices like ^IRX are quoted in percent; fall back when unavailable."""
         try:
-            payload = self.client.modules([config.RISK_FREE_SYMBOL], ["price"]).get(config.RISK_FREE_SYMBOL)
+            payload = self.client.modules([symbol], ["price"]).get(symbol)
             # A single-module request comes back flat rather than nested under "price"
             price = normalize.module(payload, "price") or (payload if isinstance(payload, dict) else {})
             rate = normalize.to_float(price.get("regularMarketPrice"))
         except Exception:  # network trouble must never block the page
-            log.exception("Risk-free rate lookup failed")
+            log.exception("Rate lookup failed for %s", symbol)
             rate = None
-        return rate / 100 if rate else config.RISK_FREE_FALLBACK
+        return rate / 100 if rate else fallback
 
 
 _default: MarketDataProvider | None = None

@@ -52,4 +52,4 @@ def main(symbols: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["MSFT", "JPM", "SPY", "^IRX"])
+    main(sys.argv[1:] or ["MSFT", "JPM", "SPY", "^IRX", "^TNX"])

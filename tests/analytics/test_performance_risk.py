@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from compass.analytics import performance, risk, technicals
-from compass.analytics.scoring import Rule, score_pillars
+from compass.analytics.scoring import PILLARS, Rule, score_pillars
 
 
 def daily_series(values, start="2020-01-01"):
@@ -106,7 +106,8 @@ def test_rule_direction_and_negative_handling():
 def test_pillars_exclude_missing_metrics_and_respect_entity_type():
     pillars = {p.name: p for p in score_pillars({"roe": 0.25, "net_margin": 0.20})}
     assert pillars["Quality"].score == 100
-    assert pillars["Quality"].coverage == "2 of 4 metrics"
+    quality_rules = [r for r in PILLARS["Quality"][1] if r.applies(False)]
+    assert pillars["Quality"].coverage == f"2 of {len(quality_rules)} metrics"
     assert pillars["Value"].score is None
 
     funds = {p.name: p for p in score_pillars({}, is_fund=True)}

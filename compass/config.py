@@ -13,6 +13,8 @@ DEFAULT_WATCHLIST = ["AAPL", "MSFT", "NVDA", "GOOGL", "JPM"]
 # 13-week T-bill yield (percent) used as the risk-free rate; fallback when unavailable
 RISK_FREE_SYMBOL = "^IRX"
 RISK_FREE_FALLBACK = 0.04
+TREASURY_10Y_SYMBOL = "^TNX"
+TREASURY_10Y_FALLBACK = 0.045
 
 TRADING_DAYS = 252
 

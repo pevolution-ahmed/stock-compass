@@ -109,3 +109,55 @@ def skeleton(height: int = 120, lines: int = 0) -> Tag:
         return tags.div(*[tags.div(class_="skeleton line", style=f"width:{90 - i * 15}%")
                           for i in range(lines)])
     return tags.div(class_="skeleton", style=f"min-height:{height}px")
+
+
+def zone_bar(value: float, zones: list[tuple[str, float, float, str]], lo: float, hi: float,
+             caption: str) -> Tag:
+    """Horizontal bar split into labeled zones (label, start, end, tone) with a marker at ``value``."""
+    span = hi - lo
+    position = min(max((value - lo) / span, 0), 1) * 100
+    return tags.div(
+        tags.div(
+            *[tags.div(tags.span(label), class_=f"zone {tone}", style=f"width:{(end - start) / span * 100:.2f}%")
+              for label, start, end, tone in zones],
+            tags.div(class_="zone-marker", style=f"left:{position:.1f}%"),
+            class_="zones", role="img", aria_label=caption,
+        ),
+        tags.div(*[tags.span(f"{start:g}", style=f"left:{(start - lo) / span * 100:.2f}%")
+                   for _, start, _, _ in zones[1:]], class_="zone-ticks"),
+    )
+
+
+def target_range(low, mean, high, current, symbol: str = "$") -> Tag:
+    """Analyst low–high target range with the mean target and today's price marked."""
+    values = [v for v in (low, mean, high, current) if not fmt.is_missing(v)]
+    if fmt.is_missing(low) or fmt.is_missing(high) or high <= low or len(values) < 3:
+        return tags.div()
+    lo, hi = min(values), max(values)
+    pad = (hi - lo) * 0.08
+    lo, hi = lo - pad, hi + pad
+    at = lambda v: (v - lo) / (hi - lo) * 100
+    return tags.div(
+        tags.div(
+            tags.div(class_="target-band", style=f"left:{at(low):.1f}%;width:{at(high) - at(low):.1f}%"),
+            tags.div(tags.span(f"Mean {fmt.price(mean, symbol)}"), class_="target-mark mean",
+                     style=f"left:{at(mean):.1f}%") if not fmt.is_missing(mean) else None,
+            tags.div(tags.span(f"Now {fmt.price(current, symbol)}"), class_="target-mark now",
+                     style=f"left:{at(current):.1f}%") if not fmt.is_missing(current) else None,
+            class_="target", role="img",
+            aria_label=f"Analyst targets {fmt.price(low, symbol)} to {fmt.price(high, symbol)}, "
+                       f"mean {fmt.price(mean, symbol)}, price {fmt.price(current, symbol)}",
+        ),
+        tags.div(tags.span(f"Low {fmt.price(low, symbol)}"), tags.span(f"High {fmt.price(high, symbol)}"),
+                 class_="range-labels"),
+    )
+
+
+def checklist(items: Iterable[tuple[bool | None, str, str]]) -> Tag:
+    """Pass / fail / not-available list, each with a symbol as well as a color."""
+    icon = {True: ("✓", "pass", "Passed"), False: ("✕", "fail", "Failed"), None: ("–", "na", "Not available")}
+    return tags.ul(*[
+        tags.li(tags.span(icon[passed][0], class_=f"check-icon {icon[passed][1]}", aria_label=icon[passed][2], role="img"),
+                tags.div(tags.div(name, class_="check-name"), tags.div(detail, class_="check-detail")))
+        for passed, name, detail in items
+    ], class_="checks")

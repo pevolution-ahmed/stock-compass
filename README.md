@@ -8,9 +8,12 @@ A one-stop investor dashboard for any stock, built with Shiny for Python: return
 
 - **Overview** — scorecard (Value, Quality, Growth, Health, Momentum), key numbers, growth of $10,000 against the S&P 500, and plain-language highlights.
 - **Performance & Risk** — "if you had invested…" calculator (with or without dividend reinvestment), total returns by period, volatility, drawdowns, Sharpe/Sortino/Calmar, beta, value at risk, up/down capture, calendar-year and monthly returns.
+- **Valuation** — multiples against their own ~4-year median, valuation history, analyst targets, and an adjustable two-stage DCF with reverse DCF (the growth today's price implies) and a sensitivity grid.
+- **Fundamentals** — revenue, profit and free cash flow trends, margins, ROIC/ROE, debt and liquidity, Altman Z-score, an itemized Piotroski F-score, dividends and buybacks.
+- Banks, insurers and funds get metrics that suit them; models that don't apply say so instead of showing misleading numbers.
 - Search any ticker, or open one directly with `?symbol=NVDA`.
 
-Valuation (with DCF), Fundamentals, Analysts & Ownership, Technicals and a Watchlist are in progress.
+Analysts & Ownership, Technicals and a Watchlist are in progress.
 
 ## Run it
 
@@ -42,7 +45,7 @@ compass/
   data/                the only code that talks to Yahoo; normalizes and caches its answers
   analytics/           pure pandas/numpy: returns, risk, metrics, scoring (no Shiny imports)
   ui/                  formatting, components, Plotly theme and chart builders
-  modules/             one Shiny module per feature (search, hero, overview, performance)
+  modules/             one Shiny module per feature (search, hero, overview, performance, valuation, fundamentals)
   ui/palette.py        the color palette — single source for CSS variables and charts
   www/                 type/spacing tokens (from DESIGN.md), styles, scripts, logo
 tests/                 analytics unit tests, end-to-end smoke test, recorded fixtures
