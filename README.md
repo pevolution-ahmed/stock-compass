@@ -34,8 +34,8 @@ You need **Python 3.11 or newer** ([download](https://www.python.org/downloads/)
 **1. Get the code.**
 
 ```bash
-git clone https://github.com/pevolution-ahmed/shiny-stock-analyzer.git
-cd shiny-stock-analyzer
+git clone https://github.com/pevolution-ahmed/stock-compass.git
+cd stock-compass
 ```
 
 **2. Install.** This creates a private Python environment in a `.venv` folder, so nothing else on your computer is affected.
@@ -319,7 +319,18 @@ Each theme in `compass/ui/palette.py` is a set of named roles (`ink`, `accent`, 
 
 ### Deploying
 
-`requirements.txt` lists everything the app needs, so it deploys like any Shiny for Python app, for example to [shinyapps.io or Posit Connect](https://shiny.posit.co/py/docs/deploy.html) with `rsconnect deploy shiny .`.
+`requirements.txt` lists everything the app needs, so it deploys like any Shiny for Python app.
+
+**[Posit Connect Cloud](https://connect.posit.cloud)** (the free plan publishes public apps from public GitHub repos):
+
+1. Sign in with GitHub, click **Publish**, then choose **Shiny**. Allow the Connect Cloud GitHub App to access this repository.
+2. Repository: this repo · Branch: `main` · Primary file: `app.py`.
+3. Under **Advanced settings**, choose Python **3.11**. No environment variables are required; add `COMPASS_THEME` to pick a theme.
+4. Click **Publish**. With **Automatically publish on push** on, every push to `main` redeploys the app.
+
+Optional: in the content's **Runtime** settings, raise **Idle Timeout** (up to 60 seconds) so a warm worker, and its data cache, stays around between visits.
+
+Posit Connect servers and shinyapps.io work too: `rsconnect deploy shiny . --entrypoint app:app`.
 
 ---
 
@@ -327,10 +338,6 @@ Each theme in `compass/ui/palette.py` is a set of named roles (`ink`, `accent`, 
 
 | Version | What it is |
 |---|---|
-| `v2.0.0` | **Stock Compass**, the investor dashboard described here |
-| `v1.1.0` | The original technical analyzer, ported to current libraries |
-| `v1.0.0` | The original 2023 technical analyzer (Shiny 0.2.9) |
-
-Earlier versions stay available, for example with `git checkout v1.1.0`.
+| `v1.0.0` | First release: scorecard, seven analysis tabs, watchlist, light and dark mode |
 
 Licensed under the [GNU General Public License v3.0](LICENSE).

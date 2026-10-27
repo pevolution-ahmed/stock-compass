@@ -1,6 +1,6 @@
 """Technical indicators (pure pandas, no Shiny).
 
-``add_bollinger_bands`` and ``add_ichimoku`` are carried over from the v1 app.
+``add_bollinger_bands`` and ``add_ichimoku`` add the band and cloud columns the price chart draws.
 """
 
 from __future__ import annotations

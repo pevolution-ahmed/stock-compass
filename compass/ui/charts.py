@@ -352,7 +352,7 @@ def price_chart(df: pd.DataFrame, overlay: str, height: int = 460) -> go.Figure:
                                  hovertemplate="%{y:.2f}<extra>Lower band</extra>"), row=1, col=1)
         fig.add_trace(line("middle_band", "20-day average", INK, 1.2, "dot"), row=1, col=1)
     elif overlay == "ichimoku":
-        # Cloud between Span A and B: green while A is above B, red otherwise (carried over from v1)
+        # Cloud between Span A and B: green while A is above B, red otherwise
         label = (df["SpanA"] > df["SpanB"]).astype(int)
         groups = label.ne(label.shift()).cumsum()
         for _, segment in df.groupby(groups):
