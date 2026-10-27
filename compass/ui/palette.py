@@ -30,7 +30,7 @@ THEMES: dict[str, dict[str, str]] = {
         "obsidian": "#11132e", "charcoal": "#41445a", "slate": "#5f6379", "pebble": "#8a8da3",
         "fog": "#eceef6", "wash": "#e4f3fa", "paper": "#ffffff",
     },
-    "forest-lime": {  # the original DESIGN.md palette
+    "forest-lime": {  # deep forest green with an electric lime accent
         "ink": "#163300", "ink-2": "#054d28", "secondary": "#0b6b8a", "accent": "#9fe870",
         "accent-on-dark": "#9fe870", "on-accent": "#163300",
         "obsidian": "#0e0f0c", "charcoal": "#454745", "slate": "#5f625f", "pebble": "#868685",

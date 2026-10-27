@@ -1,4 +1,4 @@
-/* Stock Compass — components built on tokens.css (DESIGN.md type, spacing, radii)
+/* Stock Compass — components built on tokens.css (type, spacing, radii)
    and the color roles from compass/ui/palette.py (injected as --ink, --accent, …).
    Rules of the system: flat surfaces, hairline borders, pills for anything
    clickable, the accent only as a fill or on ink, never as text on white. */

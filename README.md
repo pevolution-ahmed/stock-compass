@@ -274,7 +274,7 @@ compass/
     components.py formatting.py charts.py
   modules/               one Shiny module per feature
     search hero overview performance valuation fundamentals analysts technicals watchlist loader
-  www/                   styles (design tokens from DESIGN.md), browser scripts
+  www/                   styles (type, spacing and radius tokens), browser scripts
 tests/                   unit tests, end-to-end smoke test, recorded fixtures
 docs/images/             README screenshots
 ```

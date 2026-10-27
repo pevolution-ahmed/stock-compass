@@ -1,4 +1,4 @@
-/* Type, spacing, radius and shadow tokens from DESIGN.md (Quick Start); range values resolved
+/* Type, spacing, radius and shadow tokens; range values resolved
    (section gap 72px, element gap 12px). Colors live in compass/ui/palette.py. */
 :root {
   /* Typography — Font Families */
