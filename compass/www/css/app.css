@@ -439,7 +439,7 @@ button.pill-outline:hover { background: var(--wash); }
 
 /* Sliders (ion.rangeSlider) */
 .irs--shiny .irs-bar { background: var(--ink); border-color: var(--ink); }
-.irs--shiny .irs-handle { border-color: var(--ink); background: var(--paper); box-shadow: none; }
+.irs--shiny .irs-handle { width: 20px; height: 20px; top: 19px; border: 3px solid var(--paper); background: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .irs--shiny .irs-handle:hover, .irs--shiny .irs-handle.state_hover { background: var(--wash); }
 .irs--shiny .irs-single { background: var(--feature); color: var(--on-feature); font-family: var(--font-inter); font-weight: 600; }
 .irs--shiny .irs-line { background: var(--fog); border: 0; }

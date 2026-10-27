@@ -94,7 +94,8 @@ app_ui = ui.page_navbar(
                                                        pulse_height="3px", fade_opacity=0.5),
                     loader_ui("loader"), theme_toggle, hero_ui("hero", search_ui("search"))),
     footer=footer,
-    navbar_options=ui.navbar_options(bg=ROLES["paper"], theme="light", underline=False),
+    # No bg here: Shiny would inline it and override the theme's navbar color (app.css sets it)
+    navbar_options=ui.navbar_options(theme="light", underline=False),
 )
 
 
