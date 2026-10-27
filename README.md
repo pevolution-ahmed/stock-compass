@@ -2,6 +2,8 @@
 
 **Everything an investor needs to judge a stock, on one page.** Type a ticker and Stock Compass shows how the stock has performed, how risky it has been, whether the price looks reasonable, how strong the business and its balance sheet are, what analysts and insiders are doing, and what the charts say. Each conclusion links back to the numbers behind it.
 
+**Try it live: https://pevolution-ahmed-stock-compass.share.connect.posit.cloud/** (hosted on Posit Connect Cloud's free plan, so the first visit after a quiet spell can take a few extra seconds to wake up).
+
 Built with [Shiny for Python](https://shiny.posit.co/py/), with data from Yahoo Finance.
 
 ![Stock Compass overview in light mode](docs/images/overview-light.png)

@@ -69,7 +69,11 @@ def overlay():
                      role="progressbar", aria_valuemin="0", aria_valuemax="100", aria_valuenow="0",
                      aria_label="Data loaded", id="compass-loader-bar"),
             tags.ul(*[tags.li(tags.span(class_="loader-icon"), tags.span(label), data_step=key, class_="pending")
-                      for key, label in STEPS], class_="loader-steps"),
+                      for key, label in STEPS],
+                    # Tracked in the browser: the data can be in while the page is still drawing it
+                    tags.li(tags.span(class_="loader-icon"), tags.span("Drawing the dashboard"),
+                            data_step="render", class_="pending"),
+                    class_="loader-steps"),
             tags.button("Show what's ready", type="button", class_="loader-skip", id="compass-loader-skip"),
             class_="loader-card", role="status", aria_live="polite",
         ),

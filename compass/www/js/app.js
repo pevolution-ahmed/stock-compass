@@ -120,6 +120,44 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
   let currentSymbol = null;
   let slowTimer = null;
   let hideTimer = null;
+  let drawPoll = null;
+  const RENDER_LIMIT = 20000;  // never keep the loader up more than this after the data is in
+
+  // The visible page (stock header + active tab) has rendered: content present, nothing pending
+  const pageDrawn = () => {
+    const quote = document.getElementById("hero-quote");
+    if (!quote || !quote.children.length || quote.querySelector(".skeleton")) return false;
+    const scope = "header, .tab-content > .tab-pane.active";
+    const pending = [...document.querySelectorAll(`${scope.split(", ").map((s) => s + " .recalculating").join(", ")}`)]
+      .some((el) => el.offsetParent !== null);
+    const placeholders = document.querySelector(scope.split(", ").map((s) => s + " .skeleton").join(", "));
+    return !pending && !placeholders;
+  };
+  const renderStep = (state) => {
+    const item = loader.querySelector('[data-step="render"]');
+    if (item) item.className = state;
+  };
+  const setBar = (percent) => {
+    $("compass-loader-fill").style.width = `${percent}%`;
+    $("compass-loader-bar").setAttribute("aria-valuenow", String(percent));
+  };
+  const stopDrawWatch = () => { clearInterval(drawPoll); drawPoll = null; };
+  const finishWhenDrawn = () => {
+    stopDrawWatch();
+    renderStep("running");
+    const started = performance.now();
+    let calmChecks = 0;
+    drawPoll = setInterval(() => {
+      calmChecks = pageDrawn() ? calmChecks + 1 : 0;
+      const timedOut = performance.now() - started > RENDER_LIMIT;
+      if (calmChecks >= 2 || timedOut) {  // drawn on two checks in a row, so it isn't a gap between renders
+        stopDrawWatch();
+        renderStep(timedOut && calmChecks < 2 ? "error" : "done");
+        setBar(100);
+        hideTimer = setTimeout(hide, 450);  // let the bar reach 100% first
+      }
+    }, 250);
+  };
 
   const show = () => { loader.classList.add("is-visible"); document.body.classList.add("loader-open"); };
   const hide = () => {
@@ -134,9 +172,11 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
     $("compass-loader-title").textContent = `Gathering ${requested.toUpperCase()}'s data`;
   }
 
-  $("compass-loader-skip").addEventListener("click", () => { dismissedFor = currentSymbol; hide(); });
+  $("compass-loader-skip").addEventListener("click", () => { dismissedFor = currentSymbol; stopDrawWatch(); hide(); });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && loader.classList.contains("is-visible")) { dismissedFor = currentSymbol; hide(); }
+    if (event.key === "Escape" && loader.classList.contains("is-visible")) {
+      dismissedFor = currentSymbol; stopDrawWatch(); hide();
+    }
   });
 
   Shiny.addCustomMessageHandler("compass-loader", (msg) => {
@@ -150,18 +190,20 @@ Shiny.addCustomMessageHandler("compass-watchlist", (symbols) => {
         "Prices, financials and analyst data come from several sources, so this takes a few seconds.";
     }
     $("compass-loader-title").textContent = `Gathering ${msg.name || msg.symbol}'s data`;
-    const percent = Math.max(4, Math.round(msg.fraction * 100));
-    $("compass-loader-fill").style.width = `${percent}%`;
-    $("compass-loader-bar").setAttribute("aria-valuenow", String(percent));
+    // Data sources fill the bar to 85%; drawing the page fills the rest
+    setBar(Math.max(4, Math.round(msg.fraction * 85)));
     for (const step of msg.steps) {
       const item = loader.querySelector(`[data-step="${step.key}"]`);
       if (item) item.className = step.state;
     }
     clearTimeout(hideTimer);
     if (msg.done) {
-      hideTimer = setTimeout(hide, 450);  // let the bar reach 100% first
-    } else if (dismissedFor !== msg.symbol) {
-      show();
+      if (!loader.classList.contains("is-visible")) return;  // dismissed or already closed
+      if (!drawPoll) finishWhenDrawn();
+    } else {
+      stopDrawWatch();
+      renderStep("pending");
+      if (dismissedFor !== msg.symbol) show();
     }
   });
 })();
